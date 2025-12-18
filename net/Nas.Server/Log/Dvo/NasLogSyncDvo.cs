@@ -3,7 +3,7 @@ using Com.Scm.Dvo;
 namespace Com.Scm.Nas.Log
 {
     /// <summary>
-    /// 
+    /// 同步日志
     /// </summary>
     public class NasLogSyncDvo : ScmDataDvo
     {
@@ -13,28 +13,43 @@ namespace Com.Scm.Nas.Log
         public long user_id { get; set; }
 
         /// <summary>
-        /// 操作
+        /// 终端ID
+        /// </summary>
+        public long terminal_id { get; set; }
+
+        /// <summary>
+        /// 驱动ID
+        /// </summary>
+        public long drive_id { get; set; }
+
+        /// <summary>
+        /// 文件类型
+        /// </summary>
+        public NasTypeEnums type { get; set; }
+
+        /// <summary>
+        /// 操作类型
         /// </summary>
         public NasOptEnums opt { get; set; }
 
         /// <summary>
-        /// 方向
+        /// 同步方向
         /// </summary>
         public NasDirEnums dir { get; set; }
 
         /// <summary>
-        /// 文件
+        /// 同步文件
         /// </summary>
         public string file { get; set; }
 
         /// <summary>
-        /// 时间
+        /// 文件摘要
         /// </summary>
-        public long time { get; set; }
+        public string hash { get; set; }
 
         /// <summary>
-        /// 终端ID
+        /// 来源文件
         /// </summary>
-        public long terminal_id { get; set; }
+        public string src { get; set; }
     }
 }

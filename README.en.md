@@ -1,7 +1,7 @@
-# Nas.Net
+# Scm.Net
 
 #### Description
-基于.Net的Nas本地服务端。
+一款基于.Net6/7及Vue3适用于中后台管理系统的快速开发框架。
 
 #### Software Architecture
 Software architecture description
@@ -34,3 +34,5 @@ Software architecture description
 4.  The most valuable open source project [GVP](https://gitee.com/gvp)
 5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
 6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+
+#### Test

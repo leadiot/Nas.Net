@@ -1,0 +1,30 @@
+using Com.Scm.Dvo;
+
+namespace Com.Scm.Nas.Res
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    public class NasResDriveDvo : ScmDataDvo
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public long terminal_id { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string name { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string path { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public long time { get; set; }
+    }
+}

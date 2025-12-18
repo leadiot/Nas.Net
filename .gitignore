@@ -1,0 +1,31 @@
+﻿################################################################################
+# 此文件由项目作者创建，您可以根据需要进行增删调整。
+################################################################################
+
+# Vue 项目文件
+dist/
+node_modules/
+webpack/
+
+# Visual Studio 项目文件
+.vs/
+[Bb]in/
+[Oo]bj/
+[Ll]ogs/
+[Pp]ublish/
+PublishScripts/
+PublishProfiles/
+*.user
+
+# 自定义项目文件
+[Gg]enerator/
+[Gg]enerated/
+
+# 需要特殊处理的文件
+/net/Scm.Api/logs/
+/net/Scm.Api/dev/
+/net/Scm.Api/quartz/settings/logs/
+/net/Scm.Api/Properties/PublishProfiles/
+
+/net/Scm.Api/data/scm.db
+/net/Scm.Api/data/scm.uid

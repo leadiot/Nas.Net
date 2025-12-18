@@ -1,87 +1,38 @@
 <template>
 	<sc-dialog v-model="visible" show-fullscreen destroy-on-close :title="titleMap[mode]" width="750px" @close="close">
 		<el-form ref="formRef" label-width="100px" :model="formData" :rules="rules">
-			<el-form-item label="用户ID" prop="user_id"> 
-	<el-input 
-		v-model="formData.user_id" 
-		placeholder="请输入用户ID" 
-		:maxlength="20" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="终端ID" prop="terminal_id"> 
-	<el-input 
-		v-model="formData.terminal_id" 
-		placeholder="请输入终端ID" 
-		:maxlength="20" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="驱动ID" prop="drive_id"> 
-	<el-input 
-		v-model="formData.drive_id" 
-		placeholder="请输入驱动ID" 
-		:maxlength="20" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="目录ID" prop="dir_id"> 
-	<el-input 
-		v-model="formData.dir_id" 
-		placeholder="请输入目录ID" 
-		:maxlength="20" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="名称" prop="name"> 
-	<el-input 
-		v-model="formData.name" 
-		placeholder="请输入名称" 
-		:maxlength="256" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="路径" prop="path"> 
-	<el-input 
-		v-model="formData.path" 
-		placeholder="请输入路径" 
-		:maxlength="2048" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="文档大小" prop="size"> 
-	<el-input 
-		v-model="formData.size" 
-		placeholder="请输入文档大小" 
-		:maxlength="20" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="文档摘要" prop="hash"> 
-	<el-input 
-		v-model="formData.hash" 
-		placeholder="请输入文档摘要" 
-		:maxlength="64" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="版本" prop="ver"> 
-	<el-input 
-		v-model="formData.ver" 
-		placeholder="请输入版本" 
-		:maxlength="20" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
+			<el-form-item label="终端ID" prop="terminal_id">
+				<el-input v-model="formData.terminal_id" placeholder="请输入终端ID" :maxlength="20" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="驱动ID" prop="drive_id">
+				<el-input v-model="formData.drive_id" placeholder="请输入驱动ID" :maxlength="20" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="目录ID" prop="dir_id">
+				<el-input v-model="formData.dir_id" placeholder="请输入目录ID" :maxlength="20" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="名称" prop="name">
+				<el-input v-model="formData.name" placeholder="请输入名称" :maxlength="256" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="路径" prop="path">
+				<el-input v-model="formData.path" placeholder="请输入路径" :maxlength="2048" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="文档大小" prop="size">
+				<el-input v-model="formData.size" placeholder="请输入文档大小" :maxlength="20" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="文档摘要" prop="hash">
+				<el-input v-model="formData.hash" placeholder="请输入文档摘要" :maxlength="64" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="版本" prop="ver">
+				<el-input v-model="formData.ver" placeholder="请输入版本" :maxlength="20" show-word-limit
+					clearable></el-input>
+			</el-form-item>
 
 		</el-form>
 
@@ -98,7 +49,7 @@ export default {
 	data() {
 		return {
 			mode: "add",
-			titleMap: {add: "新增",edit: "编辑"},
+			titleMap: { add: "新增", edit: "编辑" },
 			visible: false,
 			isSaveing: false,
 			formData: this.def_data(),
@@ -117,18 +68,17 @@ export default {
 	mounted() {
 	},
 	methods: {
-		def_data(){
+		def_data() {
 			return {
 				id: this.$SCM.DEF_ID,
-				user_id:'', 
-terminal_id:'', 
-drive_id:'', 
-dir_id:'', 
-name:'', 
-path:'', 
-size:'', 
-hash:'', 
-ver:'', 
+				terminal_id: this.$SCM.DEF_ID,
+				drive_id: this.$SCM.DEF_ID,
+				dir_id: this.$SCM.DEF_ID,
+				name: '',
+				path: '',
+				size: '',
+				hash: '',
+				ver: '',
 
 			}
 		},

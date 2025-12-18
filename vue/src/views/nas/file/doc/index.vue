@@ -6,7 +6,7 @@
 					<sc-select v-model="param.option_id" placeholder="请选择" :data="option_list" />
 				</el-form-item>
 				<el-form-item label="数据状态" prop="row_status">
-					<sc-select v-model="param.row_status" placeholder="请选择" :data="row_status_list"/>
+					<sc-select v-model="param.row_status" placeholder="请选择" :data="row_status_list" />
 				</el-form-item>
 				<el-form-item label="创建时间" prop="create_time">
 					<el-date-picker v-model="param.create_time" type="datetimerange" range-separator="至"
@@ -45,8 +45,8 @@
 			</div>
 		</el-header>
 		<el-main class="nopadding">
-			<scTable ref="table" :table-name="tableName" :api-obj="apiObj" :column="column" row-key="id" @menu-handle="menuHandle"
-				@selection-change="selectionChange">
+			<scTable ref="table" :table-name="tableName" :api-obj="apiObj" :column="column" row-key="id"
+				@menu-handle="menuHandle" @selection-change="selectionChange">
 				<el-table-column align="center" fixed type="selection" width="60" />
 				<el-table-column label="#" type="index" width="50"></el-table-column>
 				<el-table-column label="操作" align="center" fixed="right" width="140">
@@ -86,32 +86,25 @@ export default {
 			tableName: 'nasfiledoc',
 			apiObj: this.$API.nasfiledoc.page,
 			list: [],
-            param:{
+			param: {
 				option_id: this.$SCM.ID_ALL,
-                row_status: this.$SCM.DEF_STATUS,
+				row_status: this.$SCM.DEF_STATUS,
 				create_time: '',
 				key: ''
-            },
+			},
 			selection: [],
 			column: [
 				{ label: "id", prop: "id", hide: true },
-                { prop: 'user_id', label: '用户ID', width: 100 },
-                { prop: 'terminal_id', label: '终端ID', width: 100 },
-                { prop: 'drive_id', label: '驱动ID', width: 100 },
-                { prop: 'dir_id', label: '目录ID', width: 100 },
-                { prop: 'name', label: '名称', width: 100 },
-                { prop: 'path', label: '路径', width: 100 },
-                { prop: 'size', label: '文档大小', width: 100 },
-                { prop: 'hash', label: '文档摘要', width: 100 },
-                { prop: 'ver', label: '版本', width: 100 },
-                { prop: 'row_status', label: '数据状态', width: 100 },
-                { prop: 'update_time', label: '更新时间', width: 100 },
-                { prop: 'create_time', label: '创建时间', width: 100 },
-
+				{ prop: 'terminal_id', label: '终端ID', width: 100 },
+				{ prop: 'drive_id', label: '驱动ID', width: 100 },
+				{ prop: 'dir_id', label: '目录ID', width: 100 },
+				{ prop: 'name', label: '名称', width: 100 },
+				{ prop: 'path', label: '路径', width: 100 },
+				{ prop: 'size', label: '文档大小', width: 100 },
+				{ prop: 'hash', label: '文档摘要', width: 100 },
+				{ prop: 'ver', label: '版本', width: 100 },
 				{ prop: "row_status", label: "数据状态", width: 80, },
-				{ prop: "update_names", label: "更新人员", width: 100, },
 				{ prop: "update_time", label: "更新时间", width: 160, formatter: this.$TOOL.dateTimeFormat },
-				{ prop: "create_names", label: "创建人员", width: 100, },
 				{ prop: "create_time", label: "创建时间", width: 160, formatter: this.$TOOL.dateTimeFormat },
 			],
 			row_status_list: [this.$SCM.OPTION_ALL_INT],
@@ -125,9 +118,9 @@ export default {
 		complete() {
 			this.$refs.table.refresh();
 		},
-        search(){
-            this.$refs.table.upData(this.param);
-        },
+		search() {
+			this.$refs.table.upData(this.param);
+		},
 		async status_item(e, row) {
 			this.$SCM.status_item(this, this.$API.nasfiledoc.status, row, row.row_status);
 		},

@@ -1,87 +1,38 @@
 <template>
 	<sc-dialog v-model="visible" show-fullscreen destroy-on-close :title="titleMap[mode]" width="750px" @close="close">
 		<el-form ref="formRef" label-width="100px" :model="formData" :rules="rules">
-			<el-form-item label="用户ID" prop="user_id"> 
-	<el-input 
-		v-model="formData.user_id" 
-		placeholder="请输入用户ID" 
-		:maxlength="20" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="终端ID" prop="terminal_id"> 
-	<el-input 
-		v-model="formData.terminal_id" 
-		placeholder="请输入终端ID" 
-		:maxlength="20" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="驱动ID" prop="drive_id"> 
-	<el-input 
-		v-model="formData.drive_id" 
-		placeholder="请输入驱动ID" 
-		:maxlength="20" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="文件类型" prop="type"> 
-	<el-input 
-		v-model="formData.type" 
-		placeholder="请输入文件类型" 
-		:maxlength="4" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="操作类型" prop="opt"> 
-	<el-input 
-		v-model="formData.opt" 
-		placeholder="请输入操作类型" 
-		:maxlength="4" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="同步方向" prop="dir"> 
-	<el-input 
-		v-model="formData.dir" 
-		placeholder="请输入同步方向" 
-		:maxlength="4" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="同步文件" prop="file"> 
-	<el-input 
-		v-model="formData.file" 
-		placeholder="请输入同步文件" 
-		:maxlength="2048" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="文件摘要" prop="hash"> 
-	<el-input 
-		v-model="formData.hash" 
-		placeholder="请输入文件摘要" 
-		:maxlength="64" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
-<el-form-item label="来源文件" prop="src"> 
-	<el-input 
-		v-model="formData.src" 
-		placeholder="请输入来源文件" 
-		:maxlength="2048" 
-		show-word-limit 
-		clearable 
-	></el-input> 
-</el-form-item> 
+			<el-form-item label="终端ID" prop="terminal_id">
+				<el-input v-model="formData.terminal_id" placeholder="请输入终端ID" :maxlength="20" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="驱动ID" prop="drive_id">
+				<el-input v-model="formData.drive_id" placeholder="请输入驱动ID" :maxlength="20" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="文件类型" prop="type">
+				<el-input v-model="formData.type" placeholder="请输入文件类型" :maxlength="4" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="操作类型" prop="opt">
+				<el-input v-model="formData.opt" placeholder="请输入操作类型" :maxlength="4" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="同步方向" prop="dir">
+				<el-input v-model="formData.dir" placeholder="请输入同步方向" :maxlength="4" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="同步文件" prop="file">
+				<el-input v-model="formData.file" placeholder="请输入同步文件" :maxlength="2048" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="文件摘要" prop="hash">
+				<el-input v-model="formData.hash" placeholder="请输入文件摘要" :maxlength="64" show-word-limit
+					clearable></el-input>
+			</el-form-item>
+			<el-form-item label="来源文件" prop="src">
+				<el-input v-model="formData.src" placeholder="请输入来源文件" :maxlength="2048" show-word-limit
+					clearable></el-input>
+			</el-form-item>
 
 		</el-form>
 
@@ -98,7 +49,7 @@ export default {
 	data() {
 		return {
 			mode: "add",
-			titleMap: {add: "新增",edit: "编辑"},
+			titleMap: { add: "新增", edit: "编辑" },
 			visible: false,
 			isSaveing: false,
 			formData: this.def_data(),
@@ -117,18 +68,17 @@ export default {
 	mounted() {
 	},
 	methods: {
-		def_data(){
+		def_data() {
 			return {
 				id: this.$SCM.DEF_ID,
-				user_id:'', 
-terminal_id:'', 
-drive_id:'', 
-type:'', 
-opt:'', 
-dir:'', 
-file:'', 
-hash:'', 
-src:'', 
+				terminal_id: this.$SCM.DEF_ID,
+				drive_id: '',
+				type: '',
+				opt: '',
+				dir: '',
+				file: '',
+				hash: '',
+				src: '',
 
 			}
 		},

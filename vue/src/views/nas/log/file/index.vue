@@ -77,14 +77,14 @@
 <script>
 import { defineAsyncComponent } from "vue";
 export default {
-	name: 'naslogsync',
+	name: 'naslogfile',
 	components: {
 		edit: defineAsyncComponent(() => import("./edit")),
 	},
 	data() {
 		return {
-			tableName: 'naslogsync',
-			apiObj: this.$API.naslogsync.page,
+			tableName: 'naslogfile',
+			apiObj: this.$API.naslogfile.page,
 			list: [],
 			param: {
 				option_id: this.$SCM.ID_ALL,
@@ -121,16 +121,16 @@ export default {
 			this.$refs.table.upData(this.param);
 		},
 		async status_item(e, row) {
-			this.$SCM.status_item(this, this.$API.naslogsync.status, row, row.row_status);
+			this.$SCM.status_item(this, this.$API.naslogfile.status, row, row.row_status);
 		},
 		status_list(status) {
-			this.$SCM.status_list(this, this.$API.naslogsync.status, this.selection, status);
+			this.$SCM.status_list(this, this.$API.naslogfile.status, this.selection, status);
 		},
 		async delete_item(row) {
-			this.$SCM.delete_item(this, this.$API.naslogsync.delete, row);
+			this.$SCM.delete_item(this, this.$API.naslogfile.delete, row);
 		},
 		delete_list() {
-			this.$SCM.delete_list(this, this.$API.naslogsync.delete, this.selection);
+			this.$SCM.delete_list(this, this.$API.naslogfile.delete, this.selection);
 		},
 		show_search() {
 			this.$refs.search.open(this.param.key);

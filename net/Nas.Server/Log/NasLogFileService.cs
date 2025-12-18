@@ -10,15 +10,15 @@ namespace Com.Scm.Nas.Log
     /// 服务接口
     /// </summary>
     [ApiExplorerSettings(GroupName = "Nas")]
-    public class NasLogSyncService : ApiService
+    public class NasLogFileService : ApiService
     {
-        private readonly SugarRepository<NasLogSyncDao> _thisRepository;
+        private readonly SugarRepository<NasLogFileDao> _thisRepository;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="thisRepository"></param>
-        public NasLogSyncService(SugarRepository<NasLogSyncDao> thisRepository, IUserService userService)
+        public NasLogFileService(SugarRepository<NasLogFileDao> thisRepository, IUserService userService)
         {
             _thisRepository = thisRepository;
             _UserService = userService;
@@ -29,14 +29,14 @@ namespace Com.Scm.Nas.Log
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<ScmSearchPageResponse<NasLogSyncDvo>> GetPagesAsync(SearchRequest request)
+        public async Task<ScmSearchPageResponse<NasLogFileDvo>> GetPagesAsync(SearchRequest request)
         {
             var result = await _thisRepository.AsQueryable()
                 .WhereIF(IsValidId(request.terminal_id), a => a.terminal_id == request.terminal_id)
                 .WhereIF(request.opt != NasOptEnums.None, a => a.opt == request.opt)
                 //.WhereIF(!string.IsNullOrEmpty(request.key), a => a.text.Contains(request.key))
                 .OrderBy(m => m.id)
-                .Select<NasLogSyncDvo>()
+                .Select<NasLogFileDvo>()
                 .ToPageAsync(request.page, request.limit);
 
             Prepare(result.Items);
@@ -49,12 +49,12 @@ namespace Com.Scm.Nas.Log
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<NasLogSyncDto> GetAsync(long id)
+        public async Task<NasLogFileDto> GetAsync(long id)
         {
             return await _thisRepository
                 .AsQueryable()
                 .Where(a => a.id == id)
-                .Select<NasLogSyncDto>()
+                .Select<NasLogFileDto>()
                 .FirstAsync();
         }
 
@@ -64,12 +64,12 @@ namespace Com.Scm.Nas.Log
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<NasLogSyncDvo> GetViewAsync(long id)
+        public async Task<NasLogFileDvo> GetViewAsync(long id)
         {
             return await _thisRepository
                 .AsQueryable()
                 .Where(a => a.id == id)
-                .Select<NasLogSyncDvo>()
+                .Select<NasLogFileDvo>()
                 .FirstAsync();
         }
 

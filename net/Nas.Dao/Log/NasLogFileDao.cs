@@ -1,4 +1,5 @@
-using Com.Scm.Dto;
+using Com.Scm.Dao.User;
+using SqlSugar;
 using System.ComponentModel.DataAnnotations;
 
 namespace Com.Scm.Nas.Log
@@ -6,7 +7,8 @@ namespace Com.Scm.Nas.Log
     /// <summary>
     /// 同步日志
     /// </summary>
-    public class NasLogSyncDto : ScmDataDto
+    [SugarTable("nas_log_sync")]
+    public class NasLogFileDao : ScmUserDataDao
     {
         /// <summary>
         /// 终端ID

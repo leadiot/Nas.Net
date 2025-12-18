@@ -87,7 +87,7 @@ export default {
 				this.mode = "add";
 			} else {
 				this.mode = "edit";
-				var res = await this.$API.naslogsync.edit.get(row.id);
+				var res = await this.$API.naslogfile.edit.get(row.id);
 				this.formData = res.data;
 			}
 			this.visible = true;
@@ -101,9 +101,9 @@ export default {
 				this.isSaveing = true;
 				let res = null;
 				if (this.$SCM.is_valid_id(this.formData.id)) {
-					res = await this.$API.naslogsync.update.put(this.formData);
+					res = await this.$API.naslogfile.update.put(this.formData);
 				} else {
-					res = await this.$API.naslogsync.add.post(this.formData);
+					res = await this.$API.naslogfile.add.post(this.formData);
 				}
 				this.isSaveing = false;
 

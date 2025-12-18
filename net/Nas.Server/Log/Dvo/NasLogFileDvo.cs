@@ -5,7 +5,7 @@ namespace Com.Scm.Nas.Log
     /// <summary>
     /// 同步日志
     /// </summary>
-    public class NasLogSyncDvo : ScmDataDvo
+    public class NasLogFileDvo : ScmDataDvo
     {
         /// <summary>
         /// 用户ID

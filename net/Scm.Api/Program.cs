@@ -135,7 +135,7 @@ namespace Com.Scm.Api
             services.RegisterServices(apiConfig);
 
             // Jwt Config
-            services.SetupJwt();
+            services.SetupJwt(envConfig);
 
             // øÁ”Ú∑√Œ 
             services.CorsSetup(corsConfig);

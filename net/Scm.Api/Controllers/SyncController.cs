@@ -14,12 +14,14 @@ using SqlSugar;
 
 namespace Com.Scm.Api.Controllers
 {
-    [ApiExplorerSettings(GroupName = "Nas")]
+    [ApiExplorerSettings(GroupName = "Scm")]
+    [AllowAnonymous]
     public class SyncController : ApiController
     {
         private ISqlSugarClient _SqlClient;
         private EnvConfig _EnvConfig;
         private ScmSysSafetyService _SafetyService;
+        private ITerminalHolder _TerminalHolder;
 
         public SyncController(ISqlSugarClient sqlClient,
             EnvConfig envConfig,
@@ -29,16 +31,22 @@ namespace Com.Scm.Api.Controllers
             _SqlClient = sqlClient;
             _EnvConfig = envConfig;
             _SafetyService = safetyService;
+            _TerminalHolder = terminalHolder;
         }
-
 
         /// <summary>
         /// 增量更新
         /// 根据日志更新
         /// </summary>
-        [HttpGet]
-        public async Task<ScmSearchPageResponse<NasLogFileDto>> GetByLogAsync(GetLogRequest request, long terminalId, string accessToken)
+        [HttpGet("byLog")]
+        public async Task<ScmSearchPageResponse<NasLogFileDto>> GetByLogAsync(GetLogRequest request)
         {
+            var terminal = _TerminalHolder.GetTerminal(request.terminal_id);
+            if (terminal == null || terminal.IsExpired())
+            {
+                return null;
+            }
+
             return await _SqlClient.Queryable<NasLogFileDao>()
                 .Where(a => a.row_status == Enums.ScmRowStatusEnum.Enabled)
                 .OrderBy(a => a.id, OrderByType.Asc)
@@ -50,9 +58,15 @@ namespace Com.Scm.Api.Controllers
         /// 全量更新
         /// 按目录更新
         /// </summary>
-        [HttpGet]
+        [HttpGet("GetDir")]
         public async Task<ScmSearchPageResponse<NasFileDirDto>> GetDirByDirAsync(GetDirRequest request)
         {
+            var terminal = _TerminalHolder.GetTerminal(request.terminal_id);
+            if (terminal == null || terminal.IsExpired())
+            {
+                return null;
+            }
+
             return await _SqlClient.Queryable<NasFileDirDao>()
                 .Where(a => a.dir_id == request.id && a.row_status == Enums.ScmRowStatusEnum.Enabled)
                 .OrderBy(a => a.id, OrderByType.Asc)
@@ -64,9 +78,15 @@ namespace Com.Scm.Api.Controllers
         /// 全量更新
         /// 按目录更新
         /// </summary>
-        [HttpGet]
+        [HttpGet("GetDoc")]
         public async Task<ScmSearchPageResponse<NasFileDocDto>> GetDocByDirAsync(GetDocRequest request)
         {
+            var terminal = _TerminalHolder.GetTerminal(request.terminal_id);
+            if (terminal == null || terminal.IsExpired())
+            {
+                return null;
+            }
+
             return await _SqlClient.Queryable<NasFileDocDao>()
                 .Where(a => a.dir_id == request.id && a.row_status == Enums.ScmRowStatusEnum.Enabled)
                 .OrderBy(a => a.id, OrderByType.Asc)
@@ -78,9 +98,14 @@ namespace Com.Scm.Api.Controllers
         /// 上传操作日志
         /// </summary>
         [HttpPost("Log")]
-        [AllowAnonymous]
         public async Task<PostLogResult> PostLogAsync(NasLogFileDto dto, [FromHeader] long terminalId, [FromHeader] string accessToken)
         {
+            var terminal = _TerminalHolder.GetTerminal(terminalId);
+            if (terminal == null || terminal.IsExpired())
+            {
+                return null;
+            }
+
             if (dto == null)
             {
                 return PostLogResult.Failure("上传对象为空！");
@@ -108,7 +133,7 @@ namespace Com.Scm.Api.Controllers
         /// <summary>
         /// 单文件下载
         /// </summary>
-        [AllowAnonymous]
+        [HttpGet("Download")]
         public void Download()
         {
         }
@@ -225,6 +250,7 @@ namespace Com.Scm.Api.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
+        [HttpGet("Check")]
         public async Task<ScmUploadResponse> CheckAsync(ScmUploadRequest request)
         {
             return null;

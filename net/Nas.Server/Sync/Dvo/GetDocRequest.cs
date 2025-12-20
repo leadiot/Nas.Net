@@ -1,6 +1,6 @@
 ﻿namespace Com.Scm.Nas.Sync.Dvo
 {
-    public class GetDirRequest : ScmSearchPageRequest
+    public class GetDocRequest : ScmSearchPageRequest
     {
         public long dir_id { get; set; }
     }

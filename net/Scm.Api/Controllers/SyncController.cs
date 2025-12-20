@@ -3,8 +3,10 @@ using Com.Scm.Controllers;
 using Com.Scm.Filters;
 using Com.Scm.Image.SkiaSharp;
 using Com.Scm.Nas.Log;
+using Com.Scm.Nas.Res;
 using Com.Scm.Nas.Sync.Dvo;
 using Com.Scm.Sys.SysSafety;
+using Com.Scm.Terminal;
 using Com.Scm.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +21,10 @@ namespace Com.Scm.Api.Controllers
         private EnvConfig _EnvConfig;
         private ScmSysSafetyService _SafetyService;
 
-        public SyncController(ISqlSugarClient sqlClient, EnvConfig envConfig, ScmSysSafetyService safetyService)
+        public SyncController(ISqlSugarClient sqlClient,
+            EnvConfig envConfig,
+            ScmSysSafetyService safetyService,
+            ITerminalHolder terminalHolder)
         {
             _SqlClient = sqlClient;
             _EnvConfig = envConfig;
@@ -32,7 +37,7 @@ namespace Com.Scm.Api.Controllers
         /// 根据日志更新
         /// </summary>
         [HttpGet]
-        public async Task<ScmSearchPageResponse<NasLogFileDto>> GetByLogAsync(GetLogRequest request)
+        public async Task<ScmSearchPageResponse<NasLogFileDto>> GetByLogAsync(GetLogRequest request, long terminalId, string accessToken)
         {
             return await _SqlClient.Queryable<NasLogFileDao>()
                 .Where(a => a.row_status == Enums.ScmRowStatusEnum.Enabled)
@@ -46,23 +51,56 @@ namespace Com.Scm.Api.Controllers
         /// 按目录更新
         /// </summary>
         [HttpGet]
-        public void GetByDirAsync(GetDirRequest request)
+        public async Task<ScmSearchPageResponse<NasFileDirDto>> GetDirByDirAsync(GetDirRequest request)
         {
+            return await _SqlClient.Queryable<NasFileDirDao>()
+                .Where(a => a.dir_id == request.id && a.row_status == Enums.ScmRowStatusEnum.Enabled)
+                .OrderBy(a => a.id, OrderByType.Asc)
+                .Select<NasFileDirDto>()
+                .ToPageAsync(request.page, request.limit);
+        }
+
+        /// <summary>
+        /// 全量更新
+        /// 按目录更新
+        /// </summary>
+        [HttpGet]
+        public async Task<ScmSearchPageResponse<NasFileDocDto>> GetDocByDirAsync(GetDocRequest request)
+        {
+            return await _SqlClient.Queryable<NasFileDocDao>()
+                .Where(a => a.dir_id == request.id && a.row_status == Enums.ScmRowStatusEnum.Enabled)
+                .OrderBy(a => a.id, OrderByType.Asc)
+                .Select<NasFileDocDto>()
+                .ToPageAsync(request.page, request.limit);
         }
 
         /// <summary>
         /// 上传操作日志
         /// </summary>
         [HttpPost]
-        public async Task PostLogAsync(NasLogFileDto dto)
+        public async Task<PostLogResult> PostLogAsync(NasLogFileDto dto)
         {
             if (dto == null)
             {
-                return;
+                return PostLogResult.Failure("上传对象为空！");
+            }
+
+            var tmpFile = _EnvConfig.GetTempPath(dto.hash + ".tmp");
+            if (!System.IO.File.Exists(tmpFile))
+            {
+                return PostLogResult.Failure("上传文档不存在！");
+            }
+
+            var dstFile = _EnvConfig.GetUploadPath(dto.file);
+            if (!FileUtils.Moveto(tmpFile, dstFile))
+            {
+                return PostLogResult.Failure("上传文档移动异常！");
             }
 
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
+
+            return PostLogResult.Success();
         }
 
         #region 文件下载
@@ -76,15 +114,6 @@ namespace Com.Scm.Api.Controllers
         #endregion
 
         #region 文件上传
-        /// <summary>
-        /// 单文件上传
-        /// </summary>
-        [AllowAnonymous]
-        public void Upload(ScmUploadRequest request)
-        {
-        }
-        #endregion
-
         /// <summary>
         /// 
         /// </summary>
@@ -118,39 +147,34 @@ namespace Com.Scm.Api.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPost("byfile")]
+        [HttpPost("file")]
         public async Task<ScmUploadResponse> ByFileAsync(ScmUploadRequest request)
         {
             var response = new ScmUploadResponse();
 
-            var files = Request.Form.Files;
-            if (files.Count == 0)
+            var file = request.file;
+            if (file == null)
             {
-                response.SetFailure("请选择文件！");
+                response.SetFailure("上传文件为空！");
                 return response;
             }
 
-            var qty = 0;
-            foreach (var file in files)
+            var name = file.Name;
+
+            var exts = Path.GetExtension(file.FileName).ToLower();
+            if (!IsAcceptExts(exts))
             {
-                var name = file.Name;
-
-                var exts = Path.GetExtension(file.FileName).ToLower();
-                if (!IsAcceptExts(exts))
-                {
-                    response.SetFailure("不支持的文件类型！");
-                    return response;
-                }
-
-                var dstFile = "";
-                using (var stream = System.IO.File.OpenWrite(dstFile))
-                {
-                    await file.CopyToAsync(stream);
-                }
-                qty += 1;
+                response.SetFailure("不支持的文件类型！");
+                return response;
             }
 
-            response.SetSuccess(qty, $"成功上传 {qty} 个文件！");
+            var dstFile = _EnvConfig.GetTempPath(name);
+            using (var stream = System.IO.File.OpenWrite(dstFile))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            response.SetSuccess($"文件上传成功！");
             return response;
         }
 
@@ -159,7 +183,7 @@ namespace Com.Scm.Api.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPost("bypart")]
+        [HttpPost("part")]
         public async Task<ScmUploadResponse> ByPartAsync(ScmUploadRequest request)
         {
             var response = new ScmUploadResponse();
@@ -196,11 +220,21 @@ namespace Com.Scm.Api.Controllers
         }
 
         /// <summary>
+        /// 检查上传清单
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<ScmUploadResponse> CheckAsync(ScmUploadRequest request)
+        {
+            return null;
+        }
+
+        /// <summary>
         /// 摘要上传
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPost("byhash")]
+        [HttpPost("hash")]
         public async Task<ScmUploadResponse> ByHashAsync(ScmUploadRequest request)
         {
             var response = new ScmUploadResponse();
@@ -235,7 +269,13 @@ namespace Com.Scm.Api.Controllers
             response.SetSuccess(qty, $"成功上传 {qty} 个文件！");
             return response;
         }
+        #endregion
 
+        /// <summary>
+        /// 是否可接受文件
+        /// </summary>
+        /// <param name="exts"></param>
+        /// <returns></returns>
         private bool IsAcceptExts(string exts)
         {
             var safety = _SafetyService.Get();

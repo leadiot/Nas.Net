@@ -42,15 +42,15 @@ namespace Com.Scm.Nas.Res
         public string path { get; set; }
 
         /// <summary>
-        /// 文档大小
-        /// </summary>
-        public long size { get; set; }
-
-        /// <summary>
         /// 文档摘要
         /// </summary>
         [StringLength(64)]
         public string hash { get; set; }
+
+        /// <summary>
+        /// 文档大小
+        /// </summary>
+        public long size { get; set; }
 
         /// <summary>
         /// 版本

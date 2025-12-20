@@ -77,8 +77,9 @@ namespace Com.Scm.Api.Controllers
         /// <summary>
         /// 上传操作日志
         /// </summary>
-        [HttpPost]
-        public async Task<PostLogResult> PostLogAsync(NasLogFileDto dto)
+        [HttpPost("Log")]
+        [AllowAnonymous]
+        public async Task<PostLogResult> PostLogAsync(NasLogFileDto dto, [FromHeader] long terminalId, [FromHeader] string accessToken)
         {
             if (dto == null)
             {

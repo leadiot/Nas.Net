@@ -21,6 +21,11 @@ namespace Com.Scm.Nas.Log
         public long drive_id { get; set; }
 
         /// <summary>
+        /// 目录ID
+        /// </summary>
+        public long dir_id { get; set; }
+
+        /// <summary>
         /// 文件类型
         /// </summary>
         [Required]
@@ -39,6 +44,11 @@ namespace Com.Scm.Nas.Log
         public NasDirEnums dir { get; set; }
 
         /// <summary>
+        /// 文件名称
+        /// </summary>
+        public string name { get; set; }
+
+        /// <summary>
         /// 同步文件
         /// </summary>
         [Required]
@@ -50,6 +60,11 @@ namespace Com.Scm.Nas.Log
         /// </summary>
         [StringLength(64)]
         public string hash { get; set; }
+
+        /// <summary>
+        /// 文件大小
+        /// </summary>
+        public long size { get; set; }
 
         /// <summary>
         /// 来源文件

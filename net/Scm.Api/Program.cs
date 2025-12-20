@@ -13,6 +13,7 @@ using Com.Scm.Quartz;
 using Com.Scm.Quartz.Config;
 using Com.Scm.Server;
 using Com.Scm.Service;
+using Com.Scm.Terminal;
 using Com.Scm.Uid.Config;
 using Com.Scm.Utils;
 using Microsoft.Extensions.FileProviders;
@@ -117,6 +118,7 @@ namespace Com.Scm.Api
             services.AddScoped<ICatService, ScmCatService>();
             services.AddScoped<ITagService, ScmTagService>();
             services.AddScoped<IFlowService, ScmFlowService>();
+            services.AddScoped<ITerminalHolder, ScmTerminalHolder>();
 
             // È«¾Ö¹ýÂË
             services.AddControllers(options =>

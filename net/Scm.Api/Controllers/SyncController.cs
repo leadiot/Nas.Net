@@ -2,23 +2,88 @@
 using Com.Scm.Controllers;
 using Com.Scm.Filters;
 using Com.Scm.Image.SkiaSharp;
+using Com.Scm.Nas.Log;
+using Com.Scm.Nas.Sync.Dvo;
 using Com.Scm.Sys.SysSafety;
+using Com.Scm.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SqlSugar;
 
 namespace Com.Scm.Api.Controllers
 {
-    [ApiExplorerSettings(GroupName = "Scm")]
-    public class UploadController : ApiController
+    [ApiExplorerSettings(GroupName = "Nas")]
+    public class SyncController : ApiController
     {
-        private EnvConfig _Config;
+        private ISqlSugarClient _SqlClient;
+        private EnvConfig _EnvConfig;
         private ScmSysSafetyService _SafetyService;
 
-        public UploadController(EnvConfig config, ScmSysSafetyService safetyService)
+        public SyncController(ISqlSugarClient sqlClient, EnvConfig envConfig, ScmSysSafetyService safetyService)
         {
-            _Config = config;
+            _SqlClient = sqlClient;
+            _EnvConfig = envConfig;
             _SafetyService = safetyService;
         }
+
+
+        /// <summary>
+        /// 增量更新
+        /// 根据日志更新
+        /// </summary>
+        [HttpGet]
+        public async Task<ScmSearchPageResponse<NasLogFileDto>> GetByLogAsync(GetLogRequest request)
+        {
+            return await _SqlClient.Queryable<NasLogFileDao>()
+                .Where(a => a.row_status == Enums.ScmRowStatusEnum.Enabled)
+                .OrderBy(a => a.id, OrderByType.Asc)
+                .Select<NasLogFileDto>()
+                .ToPageAsync(request.page, request.limit);
+        }
+
+        /// <summary>
+        /// 全量更新
+        /// 按目录更新
+        /// </summary>
+        [HttpGet]
+        public void GetByDirAsync(GetDirRequest request)
+        {
+        }
+
+        /// <summary>
+        /// 上传操作日志
+        /// </summary>
+        [HttpPost]
+        public async Task PostLogAsync(NasLogFileDto dto)
+        {
+            if (dto == null)
+            {
+                return;
+            }
+
+            var dao = dto.Adapt<NasLogFileDao>();
+            await _SqlClient.Insertable(dao).ExecuteCommandAsync();
+        }
+
+        #region 文件下载
+        /// <summary>
+        /// 单文件下载
+        /// </summary>
+        [AllowAnonymous]
+        public void Download()
+        {
+        }
+        #endregion
+
+        #region 文件上传
+        /// <summary>
+        /// 单文件上传
+        /// </summary>
+        [AllowAnonymous]
+        public void Upload(ScmUploadRequest request)
+        {
+        }
+        #endregion
 
         /// <summary>
         /// 
@@ -186,7 +251,7 @@ namespace Com.Scm.Api.Controllers
         [HttpGet("avatar/{file}"), AllowAnonymous, NoJsonResult, NoAuditLog]
         public async Task<IActionResult> AvatarAsync(string file)
         {
-            var path = _Config.GetAvatarPath(file);
+            var path = _EnvConfig.GetAvatarPath(file);
             if (!System.IO.File.Exists(path))
             {
                 var result = new ImageEngine().GenAvatar();

@@ -57,21 +57,32 @@
         Restore,
     }
 
+    /// <summary>
+    /// 同步方向
+    /// </summary>
     public enum NasDirEnums
     {
         None,
         /// <summary>
-        /// 上传
+        /// 增量上传
         /// </summary>
-        Upload,
+        IncUpload,
         /// <summary>
-        /// 下载
+        /// 全量上传
         /// </summary>
-        Download,
+        AllUpload,
         /// <summary>
-        /// 同步
+        /// 双向同步
         /// </summary>
-        Sync
+        Sync,
+        /// <summary>
+        /// 全量下载
+        /// </summary>
+        AllDownload,
+        /// <summary>
+        /// 增量下载
+        /// </summary>
+        IncDownload
     }
 
     public enum NasWatchEnums

@@ -1,4 +1,6 @@
 using Com.Scm.Dao.User;
+using Com.Scm.Enums;
+using Com.Scm.Utils;
 using SqlSugar;
 using System.ComponentModel.DataAnnotations;
 
@@ -45,10 +47,37 @@ namespace Com.Scm.Nas.Res
         /// </summary>
         public int qty { get; set; }
 
+        public ScmBoolEnum p_delete { get; set; }
+        public ScmBoolEnum s_delete { get; set; }
+        public ScmBoolEnum is_delete { get; set; }
+
         /// <summary>
         /// 版本
         /// </summary>
         [Required]
         public long ver { get; set; }
+
+        public override void PrepareCreate(long userId)
+        {
+            base.PrepareCreate(userId);
+
+            p_delete = ScmBoolEnum.False;
+            s_delete = ScmBoolEnum.False;
+            is_delete = ScmBoolEnum.False;
+
+            ver = 1;
+            row_status = ScmRowStatusEnum.Enabled;
+
+            update_time = TimeUtils.GetUnixTime();
+            create_time = update_time;
+        }
+
+        public override void PrepareUpdate(long userId)
+        {
+            base.PrepareUpdate(userId);
+
+            ver += 1;
+            update_time = TimeUtils.GetUnixTime();
+        }
     }
 }

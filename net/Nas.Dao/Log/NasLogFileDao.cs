@@ -7,7 +7,7 @@ namespace Com.Scm.Nas.Log
     /// <summary>
     /// 同步日志
     /// </summary>
-    [SugarTable("nas_log_sync")]
+    [SugarTable("nas_log_file")]
     public class NasLogFileDao : ScmUserDataDao
     {
         /// <summary>

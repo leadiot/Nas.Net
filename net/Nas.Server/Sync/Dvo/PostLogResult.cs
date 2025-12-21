@@ -6,6 +6,23 @@
         public int code { get; set; }
         public string message { get; set; }
 
+        public void SetSuccess()
+        {
+            success = true;
+        }
+
+        public void SetFailure(string message)
+        {
+            code = 0;
+            this.message = message;
+        }
+
+        public void SetFailure(int code, string message)
+        {
+            this.code = code;
+            this.message = message;
+        }
+
         public static PostLogResult Success()
         {
             return new PostLogResult { success = true };

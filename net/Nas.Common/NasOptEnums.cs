@@ -64,13 +64,13 @@
     {
         None,
         /// <summary>
-        /// 增量上传
-        /// </summary>
-        IncUpload,
-        /// <summary>
         /// 全量上传
         /// </summary>
         AllUpload,
+        /// <summary>
+        /// 增量上传
+        /// </summary>
+        IncUpload,
         /// <summary>
         /// 双向同步
         /// </summary>

@@ -1,5 +1,52 @@
 ﻿namespace Com.Scm.Nas
 {
+    /// <summary>
+    /// 文件类型
+    /// </summary>
+    public enum NasTypeEnums
+    {
+        None,
+        /// <summary>
+        /// 目录
+        /// </summary>
+        Dir,
+        /// <summary>
+        /// 文档
+        /// </summary>
+        Doc
+    }
+
+    /// <summary>
+    /// 同步方向
+    /// </summary>
+    public enum NasDirEnums
+    {
+        None,
+        /// <summary>
+        /// 全量上传
+        /// </summary>
+        AllUpload,
+        /// <summary>
+        /// 增量上传
+        /// </summary>
+        IncUpload,
+        /// <summary>
+        /// 双向同步
+        /// </summary>
+        Sync,
+        /// <summary>
+        /// 全量下载
+        /// </summary>
+        AllDownload,
+        /// <summary>
+        /// 增量下载
+        /// </summary>
+        IncDownload
+    }
+
+    /// <summary>
+    /// 操作类型
+    /// </summary>
     public enum NasOptEnums
     {
         None,
@@ -58,33 +105,8 @@
     }
 
     /// <summary>
-    /// 同步方向
+    /// 监控状态
     /// </summary>
-    public enum NasDirEnums
-    {
-        None,
-        /// <summary>
-        /// 全量上传
-        /// </summary>
-        AllUpload,
-        /// <summary>
-        /// 增量上传
-        /// </summary>
-        IncUpload,
-        /// <summary>
-        /// 双向同步
-        /// </summary>
-        Sync,
-        /// <summary>
-        /// 全量下载
-        /// </summary>
-        AllDownload,
-        /// <summary>
-        /// 增量下载
-        /// </summary>
-        IncDownload
-    }
-
     public enum NasWatchEnums
     {
         None,
@@ -100,18 +122,5 @@
         /// 已中止
         /// </summary>
         Stoped
-    }
-
-    public enum NasTypeEnums
-    {
-        None,
-        /// <summary>
-        /// 目录
-        /// </summary>
-        Dir,
-        /// <summary>
-        /// 文档
-        /// </summary>
-        Doc
     }
 }

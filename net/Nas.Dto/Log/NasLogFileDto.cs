@@ -49,11 +49,11 @@ namespace Com.Scm.Nas.Log
         public string name { get; set; }
 
         /// <summary>
-        /// 同步文件
+        /// 文件路径
         /// </summary>
         [Required]
         [StringLength(2048)]
-        public string file { get; set; }
+        public string path { get; set; }
 
         /// <summary>
         /// 文件摘要

@@ -86,13 +86,13 @@ namespace Com.Scm.Nas.Sync
         /// <param name="terminalId"></param>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public async Task<PostLogResult> PostLogAsync(NasLogFileDto dto,
+        public async Task<SyncResult> PostLogAsync(NasLogFileDto dto,
             [FromHeader] long terminalId,
             [FromHeader] string token)
         {
             if (dto == null)
             {
-                return PostLogResult.Failure("上传对象为空！");
+                return SyncResult.Failure("上传对象为空！");
             }
 
             var terminalToken = _TerminalHolder.GetTerminal(terminalId);
@@ -101,10 +101,10 @@ namespace Com.Scm.Nas.Sync
                 return null;
             }
 
-            var result = new PostLogResult();
+            var result = new SyncResult();
             if (dto.opt == NasOptEnums.Delete)
             {
-                await DeleteFile(dto, result);
+                await DeleteFile(terminalToken, dto, result);
                 return result;
             }
 
@@ -152,13 +152,14 @@ namespace Com.Scm.Nas.Sync
             //return PostLogResult.Success();
         }
 
+        #region 创建文件
         /// <summary>
         /// 创建文件
         /// </summary>
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public async Task<bool> CreateFile(ScmTerminalToken token, NasLogFileDto dto, PostLogResult result)
+        public async Task<bool> CreateFile(ScmTerminalToken token, NasLogFileDto dto, SyncResult result)
         {
             if (dto.type == NasTypeEnums.Doc)
             {
@@ -179,7 +180,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> CreateDoc(ScmTerminalToken token, NasLogFileDto dto, PostLogResult result)
+        private async Task<bool> CreateDoc(ScmTerminalToken token, NasLogFileDto dto, SyncResult result)
         {
             var tmpFile = _EnvConfig.GetTempPath(dto.hash + ".tmp");
             if (!File.Exists(tmpFile))
@@ -187,10 +188,10 @@ namespace Com.Scm.Nas.Sync
                 return false;
             }
 
-            var dstFile = _EnvConfig.GetUploadPath(dto.file);
+            var dstFile = _EnvConfig.GetUploadPath(dto.path);
             if (!FileUtils.Moveto(tmpFile, dstFile))
             {
-                PostLogResult.Failure("上传文档移动异常！");
+                SyncResult.Failure("上传文档移动异常！");
                 return false;
             }
 
@@ -208,9 +209,9 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> CreateDir(ScmTerminalToken token, NasLogFileDto dto, PostLogResult result)
+        private async Task<bool> CreateDir(ScmTerminalToken token, NasLogFileDto dto, SyncResult result)
         {
-            var tmpFile = GetUploadPath(token, dto.file);
+            var tmpFile = GetUploadPath(token, dto.path);
             if (!Directory.Exists(tmpFile))
             {
                 Directory.CreateDirectory(tmpFile);
@@ -230,7 +231,7 @@ namespace Com.Scm.Nas.Sync
             docDao.drive_id = dto.drive_id;
             docDao.dir_id = dto.dir_id;
             docDao.name = dto.name;
-            docDao.path = dto.file;
+            docDao.path = dto.path;
             docDao.hash = dto.hash;
             docDao.size = dto.size;
             docDao.PrepareCreate(token.user_id);
@@ -245,47 +246,35 @@ namespace Com.Scm.Nas.Sync
             dirDao.drive_id = dto.drive_id;
             dirDao.dir_id = dto.dir_id;
             dirDao.name = dto.name;
-            dirDao.path = dto.file;
+            dirDao.path = dto.path;
             dirDao.PrepareCreate(token.user_id);
 
             await _SqlClient.Insertable(dirDao).ExecuteCommandAsync();
         }
+        #endregion
 
-        private async Task DeleteDocDao(NasLogFileDto dto)
-        {
-            await _SqlClient.Deleteable<NasFileDocDao>()
-                .Where(a => a.dir_id == dto.dir_id && a.name == dto.name)
-                .ExecuteCommandAsync();
-        }
-
-        private async Task DeleteDirDao(NasLogFileDto dto)
-        {
-            await _SqlClient.Deleteable<NasFileDirDao>()
-                .Where(a => a.dir_id == dto.dir_id)
-                .ExecuteCommandAsync();
-        }
-
+        #region 删除文件
         /// <summary>
         /// 删除文件
         /// </summary>
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public async Task<bool> DeleteFile(NasLogFileDto dto, PostLogResult result)
+        public async Task<bool> DeleteFile(ScmTerminalToken token, NasLogFileDto dto, SyncResult result)
         {
             if (dto == null)
             {
                 return false;
             }
 
-            if (dto.type == NasTypeEnums.Doc)
-            {
-                return await DeleteDoc(dto, result);
-            }
-
             if (dto.type == NasTypeEnums.Dir)
             {
-                return await DeleteDir(dto, result);
+                return await DeleteDir(token, dto, result);
+            }
+
+            if (dto.type == NasTypeEnums.Doc)
+            {
+                return await DeleteDoc(token, dto, result);
             }
 
             return false;
@@ -297,12 +286,18 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> DeleteDoc(NasLogFileDto dto, PostLogResult result)
+        private async Task<bool> DeleteDoc(ScmTerminalToken token, NasLogFileDto dto, SyncResult result)
         {
-            var dstFile = _EnvConfig.GetUploadPath(dto.file);
-            FileUtils.DeleteFile(dstFile);
+            var dstFile = _EnvConfig.GetUploadPath(dto.path);
+            FileUtils.DeleteDoc(dstFile);
 
-            await DeleteDocDao(dto);
+            var docDao = await _SqlClient.Queryable<NasFileDocDao>()
+                .Where(a => a.user_id == token.user_id && a.path == dto.path && a.hash == dto.hash)
+                .FirstAsync();
+            if (docDao == null)
+            {
+                await DeleteDocDao(docDao);
+            }
 
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
@@ -316,12 +311,20 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> DeleteDir(NasLogFileDto dto, PostLogResult result)
+        private async Task<bool> DeleteDir(ScmTerminalToken token, NasLogFileDto dto, SyncResult result)
         {
-            var dstFile = _EnvConfig.GetUploadPath(dto.file);
-            FileUtils.DeleteFolder(dstFile);
+            var dstFile = _EnvConfig.GetUploadPath(dto.path);
+            FileUtils.DeleteDir(dstFile);
 
-            await DeleteDirDao(dto);
+            var dirDao = await _SqlClient.Queryable<NasFileDirDao>()
+                .Where(a => a.terminal_id == token.id && a.path == dto.path)
+                .FirstAsync();
+            if (dirDao != null)
+            {
+                await DeleteDirDao(dirDao);
+
+                await _SqlClient.Deleteable(dirDao).ExecuteCommandAsync();
+            }
 
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
@@ -329,13 +332,39 @@ namespace Com.Scm.Nas.Sync
             return true;
         }
 
+        private async Task DeleteDocDao(NasFileDocDao dao)
+        {
+            await _SqlClient.Deleteable(dao).ExecuteCommandAsync();
+        }
+
+        private async Task DeleteDirDao(NasFileDirDao dao)
+        {
+            await _SqlClient.Deleteable<NasFileDocDao>()
+                .Where(a => a.dir_id == dao.dir_id)
+                .ExecuteCommandAsync();
+
+            var dirList = await _SqlClient.Queryable<NasFileDirDao>()
+                .Where(a => a.dir_id == dao.dir_id)
+                .ToListAsync();
+            foreach (var dir in dirList)
+            {
+                await DeleteDirDao(dir);
+            }
+
+            await _SqlClient.Deleteable<NasFileDirDao>()
+                .Where(a => a.dir_id == dao.dir_id)
+                .ExecuteCommandAsync();
+        }
+        #endregion
+
+        #region 移动文件
         /// <summary>
         /// 移动文件
         /// </summary>
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public async Task<bool> MoveFile(NasLogFileDto dto, PostLogResult result)
+        public async Task<bool> MoveFile(NasLogFileDto dto, SyncResult result)
         {
             if (dto == null)
             {
@@ -361,7 +390,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> MoveDoc(NasLogFileDto dto, PostLogResult result)
+        private async Task<bool> MoveDoc(NasLogFileDto dto, SyncResult result)
         {
             var srcFile = _EnvConfig.GetUploadPath(dto.src);
             if (!File.Exists(srcFile))
@@ -369,7 +398,7 @@ namespace Com.Scm.Nas.Sync
                 return false;
             }
 
-            var dstFile = _EnvConfig.GetUploadPath(dto.file);
+            var dstFile = _EnvConfig.GetUploadPath(dto.path);
             FileUtils.Moveto(srcFile, dstFile);
 
             var dao = dto.Adapt<NasLogFileDao>();
@@ -384,7 +413,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> MoveDir(NasLogFileDto dto, PostLogResult result)
+        private async Task<bool> MoveDir(NasLogFileDto dto, SyncResult result)
         {
             var srcFile = _EnvConfig.GetUploadPath(dto.src);
             if (!Directory.Exists(srcFile))
@@ -392,7 +421,7 @@ namespace Com.Scm.Nas.Sync
                 return false;
             }
 
-            var dstFile = _EnvConfig.GetUploadPath(dto.file);
+            var dstFile = _EnvConfig.GetUploadPath(dto.path);
             FileUtils.Moveto(srcFile, dstFile);
 
             var dao = dto.Adapt<NasLogFileDao>();
@@ -400,14 +429,16 @@ namespace Com.Scm.Nas.Sync
 
             return true;
         }
+        #endregion
 
+        #region 复件文件
         /// <summary>
         /// 移动文件
         /// </summary>
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public async Task<bool> CopyFile(NasLogFileDto dto, PostLogResult result)
+        public async Task<bool> CopyFile(NasLogFileDto dto, SyncResult result)
         {
             if (dto == null)
             {
@@ -433,7 +464,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> CopyDoc(NasLogFileDto dto, PostLogResult result)
+        private async Task<bool> CopyDoc(NasLogFileDto dto, SyncResult result)
         {
             var srcFile = _EnvConfig.GetUploadPath(dto.src);
             if (!File.Exists(srcFile))
@@ -441,7 +472,7 @@ namespace Com.Scm.Nas.Sync
                 return false;
             }
 
-            var dstFile = _EnvConfig.GetUploadPath(dto.file);
+            var dstFile = _EnvConfig.GetUploadPath(dto.path);
             FileUtils.Copyto(srcFile, dstFile);
 
             var dao = dto.Adapt<NasLogFileDao>();
@@ -456,7 +487,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> CopyDir(NasLogFileDto dto, PostLogResult result)
+        private async Task<bool> CopyDir(NasLogFileDto dto, SyncResult result)
         {
             var srcFile = _EnvConfig.GetUploadPath(dto.src);
             if (!Directory.Exists(srcFile))
@@ -464,7 +495,7 @@ namespace Com.Scm.Nas.Sync
                 return false;
             }
 
-            var dstFile = _EnvConfig.GetUploadPath(dto.file);
+            var dstFile = _EnvConfig.GetUploadPath(dto.path);
             FileUtils.Copyto(srcFile, dstFile);
 
             var dao = dto.Adapt<NasLogFileDao>();
@@ -472,6 +503,7 @@ namespace Com.Scm.Nas.Sync
 
             return true;
         }
+        #endregion
 
         /// <summary>
         /// 
@@ -497,7 +529,7 @@ namespace Com.Scm.Nas.Sync
                 .FirstAsync();
         }
 
-        public async Task<bool> RenameFile(NasLogFileDto dto, PostLogResult result)
+        public async Task<bool> RenameFile(NasLogFileDto dto, SyncResult result)
         {
             return true;
         }

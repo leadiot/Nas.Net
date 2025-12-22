@@ -1,6 +1,6 @@
 ﻿namespace Com.Scm.Nas.Sync.Dvo
 {
-    public class PostLogResult
+    public class SyncResult
     {
         public bool success { get; set; }
         public int code { get; set; }
@@ -23,19 +23,19 @@
             this.message = message;
         }
 
-        public static PostLogResult Success()
+        public static SyncResult Success()
         {
-            return new PostLogResult { success = true };
+            return new SyncResult { success = true };
         }
 
-        public static PostLogResult Failure(string message)
+        public static SyncResult Failure(string message)
         {
-            return new PostLogResult { success = false, message = message };
+            return new SyncResult { success = false, message = message };
         }
 
-        public static PostLogResult Failure(int code, string message)
+        public static SyncResult Failure(int code, string message)
         {
-            return new PostLogResult { success = false, code = code, message = message };
+            return new SyncResult { success = false, code = code, message = message };
         }
     }
 }

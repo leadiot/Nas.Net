@@ -6,5 +6,10 @@
         /// 虚拟路径标识
         /// </summary>
         public const string VirtualTag = "nas:/";
+
+        /// <summary>
+        /// 上传临时文件后缀
+        /// </summary>
+        public const string TempFileExt = ".nas";
     }
 }

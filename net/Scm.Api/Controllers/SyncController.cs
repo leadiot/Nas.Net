@@ -98,7 +98,7 @@ namespace Com.Scm.Api.Controllers
         /// 上传操作日志
         /// </summary>
         [HttpPost("Log")]
-        public async Task<PostLogResult> PostLogAsync(NasLogFileDto dto, [FromHeader] long terminalId, [FromHeader] string accessToken)
+        public async Task<SyncResult> PostLogAsync(NasLogFileDto dto, [FromHeader] long terminalId, [FromHeader] string accessToken)
         {
             var terminal = _TerminalHolder.GetTerminal(terminalId);
             if (terminal == null || terminal.IsExpired())
@@ -108,25 +108,25 @@ namespace Com.Scm.Api.Controllers
 
             if (dto == null)
             {
-                return PostLogResult.Failure("上传对象为空！");
+                return SyncResult.Failure("上传对象为空！");
             }
 
             var tmpFile = _EnvConfig.GetTempPath(dto.hash + ".tmp");
             if (!System.IO.File.Exists(tmpFile))
             {
-                return PostLogResult.Failure("上传文档不存在！");
+                return SyncResult.Failure("上传文档不存在！");
             }
 
-            var dstFile = _EnvConfig.GetUploadPath(dto.file);
+            var dstFile = _EnvConfig.GetUploadPath(dto.path);
             if (!FileUtils.Moveto(tmpFile, dstFile))
             {
-                return PostLogResult.Failure("上传文档移动异常！");
+                return SyncResult.Failure("上传文档移动异常！");
             }
 
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
 
-            return PostLogResult.Success();
+            return SyncResult.Success();
         }
 
         #region 文件下载

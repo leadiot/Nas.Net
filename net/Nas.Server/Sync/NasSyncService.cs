@@ -11,12 +11,21 @@ using SqlSugar;
 
 namespace Com.Scm.Nas.Sync
 {
+    /// <summary>
+    /// 终端文件同步服务
+    /// </summary>
     [ApiExplorerSettings(GroupName = "Scm")]
     [AllowAnonymous]
     public class NasSyncService : ApiService
     {
         private ITerminalHolder _TerminalHolder;
 
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="sqlClient"></param>
+        /// <param name="envConfig"></param>
+        /// <param name="terminalHolder"></param>
         public NasSyncService(ISqlSugarClient sqlClient, EnvConfig envConfig, ITerminalHolder terminalHolder)
         {
             _SqlClient = sqlClient;
@@ -24,6 +33,11 @@ namespace Com.Scm.Nas.Sync
             _TerminalHolder = terminalHolder;
         }
 
+        /// <summary>
+        /// 获取同步日志（按时间升序排列）
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         public async Task<ScmSearchPageResponse<NasLogFileDto>> GetLogAsync(GetLogRequest request)
         {
             var terminal = _TerminalHolder.GetTerminal(request.terminal_id);
@@ -40,7 +54,7 @@ namespace Com.Scm.Nas.Sync
         }
 
         /// <summary>
-        /// 
+        /// 获取目录列表（根据上级目录）
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
@@ -60,7 +74,7 @@ namespace Com.Scm.Nas.Sync
         }
 
         /// <summary>
-        /// 
+        /// 获取文档列表（根据上级目录）
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
@@ -79,8 +93,77 @@ namespace Com.Scm.Nas.Sync
                 .ToPageAsync(request.page, request.limit);
         }
 
+        #region 文件上传
         /// <summary>
-        /// 
+        /// 小文件上传
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<ScmUploadResponse> UploadFileAsync(ScmUploadRequest request)
+        {
+            var response = new ScmUploadResponse();
+
+            var file = request.file;
+            if (file == null)
+            {
+                response.SetFailure("上传文件为空！");
+                return response;
+            }
+
+            var name = file.Name;
+
+            //var exts = Path.GetExtension(file.FileName).ToLower();
+            //if (!IsAcceptExts(exts))
+            //{
+            //    response.SetFailure("不支持的文件类型！");
+            //    return response;
+            //}
+
+            var dstFile = _EnvConfig.GetTempPath(name);
+            using (var stream = System.IO.File.OpenWrite(dstFile))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            response.SetSuccess($"文件上传成功！");
+            return response;
+        }
+
+        #region 大文件上传
+        /// <summary>
+        /// 分块上传
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<ScmUploadResponse> UploadChunkAsync(ScmUploadRequest request)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// 上传校验
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<ScmUploadResponse> UploadCheckAsync(ScmUploadRequest request)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// 文件合并
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<ScmUploadResponse> UploadMergeAsync(ScmUploadRequest request)
+        {
+            return null;
+        }
+        #endregion
+        #endregion
+
+        /// <summary>
+        /// 上传同步日志
         /// </summary>
         /// <param name="dto"></param>
         /// <param name="terminalId"></param>
@@ -438,7 +521,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public async Task<bool> CopyFile(NasLogFileDto dto, SyncResult result)
+        private async Task<bool> CopyFile(NasLogFileDto dto, SyncResult result)
         {
             if (dto == null)
             {
@@ -505,6 +588,19 @@ namespace Com.Scm.Nas.Sync
         }
         #endregion
 
+        #region 更名文件
+        /// <summary>
+        /// 更名文件
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private async Task<bool> RenameFile(NasLogFileDto dto, SyncResult result)
+        {
+            return true;
+        }
+        #endregion
+
         /// <summary>
         /// 
         /// </summary>
@@ -527,11 +623,6 @@ namespace Com.Scm.Nas.Sync
             return await _SqlClient.Queryable<NasFileDocDao>()
                 .Where(a => a.user_id == 0 && a.path == path)
                 .FirstAsync();
-        }
-
-        public async Task<bool> RenameFile(NasLogFileDto dto, SyncResult result)
-        {
-            return true;
         }
 
         private string GetUploadPath(ScmTerminalToken token, string path)

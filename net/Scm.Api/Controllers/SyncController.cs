@@ -6,7 +6,6 @@ using Com.Scm.Nas.Log;
 using Com.Scm.Nas.Res;
 using Com.Scm.Nas.Sync.Dvo;
 using Com.Scm.Sys.SysSafety;
-using Com.Scm.Terminal;
 using Com.Scm.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,7 +40,9 @@ namespace Com.Scm.Api.Controllers
         [HttpGet("byLog")]
         public async Task<ScmSearchPageResponse<NasLogFileDto>> GetByLogAsync(GetLogRequest request)
         {
-            var terminal = _TerminalHolder.GetTerminal(request.terminal_id);
+            var terminalId = 0;
+
+            var terminal = _TerminalHolder.GetTerminal(terminalId);
             if (terminal == null || terminal.IsExpired())
             {
                 return null;
@@ -61,7 +62,9 @@ namespace Com.Scm.Api.Controllers
         [HttpGet("GetDir")]
         public async Task<ScmSearchPageResponse<NasFileDirDto>> GetDirByDirAsync(GetDirRequest request)
         {
-            var terminal = _TerminalHolder.GetTerminal(request.terminal_id);
+            var terminalId = 0;
+
+            var terminal = _TerminalHolder.GetTerminal(terminalId);
             if (terminal == null || terminal.IsExpired())
             {
                 return null;
@@ -81,7 +84,9 @@ namespace Com.Scm.Api.Controllers
         [HttpGet("GetDoc")]
         public async Task<ScmSearchPageResponse<NasFileDocDto>> GetDocByDirAsync(GetDocRequest request)
         {
-            var terminal = _TerminalHolder.GetTerminal(request.terminal_id);
+            var terminalId = 0;
+
+            var terminal = _TerminalHolder.GetTerminal(terminalId);
             if (terminal == null || terminal.IsExpired())
             {
                 return null;

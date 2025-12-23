@@ -4,8 +4,8 @@ using Com.Scm.Nas.Res;
 using Com.Scm.Nas.Sync.Dvo;
 using Com.Scm.Service;
 using Com.Scm.Terminal;
+using Com.Scm.Token;
 using Com.Scm.Utils;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SqlSugar;
 
@@ -15,9 +15,9 @@ namespace Com.Scm.Nas.Sync
     /// 终端文件同步服务
     /// </summary>
     [ApiExplorerSettings(GroupName = "Scm")]
-    [AllowAnonymous]
     public class NasSyncService : ApiService
     {
+        private ScmContextHolder _ScmHolder;
         private ITerminalHolder _TerminalHolder;
 
         /// <summary>
@@ -26,10 +26,14 @@ namespace Com.Scm.Nas.Sync
         /// <param name="sqlClient"></param>
         /// <param name="envConfig"></param>
         /// <param name="terminalHolder"></param>
-        public NasSyncService(ISqlSugarClient sqlClient, EnvConfig envConfig, ITerminalHolder terminalHolder)
+        public NasSyncService(ISqlSugarClient sqlClient,
+            EnvConfig envConfig,
+            ScmContextHolder scmHolder,
+            ITerminalHolder terminalHolder)
         {
             _SqlClient = sqlClient;
             _EnvConfig = envConfig;
+            _ScmHolder = scmHolder;
             _TerminalHolder = terminalHolder;
         }
 
@@ -40,7 +44,9 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<ScmSearchPageResponse<NasLogFileDto>> GetLogAsync(GetLogRequest request)
         {
-            var terminal = _TerminalHolder.GetTerminal(request.terminal_id);
+            var terminalId = _ScmHolder.GetToken().terminal_id;
+
+            var terminal = _TerminalHolder.GetTerminal(terminalId);
             if (terminal == null || terminal.IsExpired())
             {
                 return null;
@@ -60,7 +66,9 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<ScmSearchPageResponse<NasFileDirDto>> GetDirAsync(GetDirRequest request)
         {
-            var terminal = _TerminalHolder.GetTerminal(request.terminal_id);
+            var terminalId = _ScmHolder.GetToken().terminal_id;
+
+            var terminal = _TerminalHolder.GetTerminal(terminalId);
             if (terminal == null || terminal.IsExpired())
             {
                 return null;
@@ -80,7 +88,9 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<ScmSearchPageResponse<NasFileDocDto>> GetDocAsync(GetDocRequest request)
         {
-            var terminal = _TerminalHolder.GetTerminal(request.terminal_id);
+            var terminalId = _ScmHolder.GetToken().terminal_id;
+
+            var terminal = _TerminalHolder.GetTerminal(terminalId);
             if (terminal == null || terminal.IsExpired())
             {
                 return null;

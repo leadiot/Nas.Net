@@ -20,10 +20,10 @@ namespace Com.Scm.Nas.Res
         /// 
         /// </summary>
         /// <param name="thisRepository"></param>
-        public NasResDriveService(SugarRepository<NasResDriveDao> thisRepository, IUserService userService)
+        public NasResDriveService(SugarRepository<NasResDriveDao> thisRepository, IUserHolder userHolder)
         {
             _thisRepository = thisRepository;
-            _UserService = userService;
+            _UserService = userHolder;
         }
 
         /// <summary>

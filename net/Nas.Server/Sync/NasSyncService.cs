@@ -242,7 +242,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public async Task<bool> CreateFile(ScmTerminalToken token, NasLogFileDto dto, SyncResult result)
+        public async Task<bool> CreateFile(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
         {
             if (dto.type == NasTypeEnums.Doc)
             {
@@ -263,7 +263,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> CreateDoc(ScmTerminalToken token, NasLogFileDto dto, SyncResult result)
+        private async Task<bool> CreateDoc(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
         {
             var tmpFile = _EnvConfig.GetTempPath(dto.hash + ".tmp");
             if (!File.Exists(tmpFile))
@@ -292,7 +292,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> CreateDir(ScmTerminalToken token, NasLogFileDto dto, SyncResult result)
+        private async Task<bool> CreateDir(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
         {
             var tmpFile = GetUploadPath(token, dto.path);
             if (!Directory.Exists(tmpFile))
@@ -307,7 +307,7 @@ namespace Com.Scm.Nas.Sync
             return true;
         }
 
-        private async Task CreateDocDao(ScmTerminalToken token, NasLogFileDto dto)
+        private async Task CreateDocDao(ScmTerminalInfo token, NasLogFileDto dto)
         {
             var docDao = new NasFileDocDao();
             docDao.terminal_id = token.id;
@@ -322,7 +322,7 @@ namespace Com.Scm.Nas.Sync
             await _SqlClient.Insertable(docDao).ExecuteCommandAsync();
         }
 
-        private async Task CreateDirDao(ScmTerminalToken token, NasLogFileDto dto)
+        private async Task CreateDirDao(ScmTerminalInfo token, NasLogFileDto dto)
         {
             var dirDao = new NasFileDirDao();
             dirDao.terminal_id = token.id;
@@ -343,7 +343,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public async Task<bool> DeleteFile(ScmTerminalToken token, NasLogFileDto dto, SyncResult result)
+        public async Task<bool> DeleteFile(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
         {
             if (dto == null)
             {
@@ -369,7 +369,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> DeleteDoc(ScmTerminalToken token, NasLogFileDto dto, SyncResult result)
+        private async Task<bool> DeleteDoc(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
         {
             var dstFile = _EnvConfig.GetUploadPath(dto.path);
             FileUtils.DeleteDoc(dstFile);
@@ -394,7 +394,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> DeleteDir(ScmTerminalToken token, NasLogFileDto dto, SyncResult result)
+        private async Task<bool> DeleteDir(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
         {
             var dstFile = _EnvConfig.GetUploadPath(dto.path);
             FileUtils.DeleteDir(dstFile);
@@ -625,7 +625,7 @@ namespace Com.Scm.Nas.Sync
                 .FirstAsync();
         }
 
-        private string GetUploadPath(ScmTerminalToken token, string path)
+        private string GetUploadPath(ScmTerminalInfo token, string path)
         {
             if (string.IsNullOrEmpty(path))
             {

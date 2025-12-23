@@ -18,10 +18,10 @@ namespace Com.Scm.Nas.Log
         /// 
         /// </summary>
         /// <param name="thisRepository"></param>
-        public NasLogFileService(SugarRepository<NasLogFileDao> thisRepository, IUserService userService)
+        public NasLogFileService(SugarRepository<NasLogFileDao> thisRepository, IUserHolder userHolder)
         {
             _thisRepository = thisRepository;
-            _UserService = userService;
+            _UserService = userHolder;
         }
 
         /// <summary>

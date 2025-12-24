@@ -1,4 +1,5 @@
-﻿using Com.Scm.Config;
+﻿using Com.Scm.Api;
+using Com.Scm.Config;
 using Com.Scm.Nas.Log;
 using Com.Scm.Nas.Res;
 using Com.Scm.Nas.Sync.Dvo;
@@ -6,6 +7,7 @@ using Com.Scm.Service;
 using Com.Scm.Terminal;
 using Com.Scm.Token;
 using Com.Scm.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SqlSugar;
 
@@ -14,7 +16,8 @@ namespace Com.Scm.Nas.Sync
     /// <summary>
     /// 终端文件同步服务
     /// </summary>
-    [ApiExplorerSettings(GroupName = "Scm")]
+    [ApiExplorerSettings(GroupName = "Nas")]
+    [AllowAnonymous]
     public class NasSyncService : ApiService
     {
         private ScmContextHolder _ScmHolder;
@@ -35,6 +38,19 @@ namespace Com.Scm.Nas.Sync
             _EnvConfig = envConfig;
             _ScmHolder = scmHolder;
             _TerminalHolder = terminalHolder;
+        }
+
+        /// <summary>
+        /// 消息回馈
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<ScmApiResponse> GetEchoAsync(GetLogRequest request)
+        {
+            var response = new ScmApiResponse();
+            response.SetSuccess();
+
+            return response;
         }
 
         /// <summary>

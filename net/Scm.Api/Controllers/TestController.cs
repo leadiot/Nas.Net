@@ -1,5 +1,4 @@
 ﻿using Com.Scm.Controllers;
-using Com.Scm.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,12 +12,13 @@ namespace Com.Scm.Api.Controllers
         }
 
 
-        [HttpGet, AllowAnonymous]
-        public object Demo()
+        [HttpPost("Demo"), AllowAnonymous]
+        public object Demo(ScmUploadRequest request)
         {
-            var id = UidUtils.NextId();
-            var code = UidUtils.NextCodes("samples_demo");
-            return new { id, code };
+            //var id = UidUtils.NextId();
+            //var code = UidUtils.NextCodes("samples_demo");
+            //return new { id, code };
+            return "Ok";
         }
     }
 }

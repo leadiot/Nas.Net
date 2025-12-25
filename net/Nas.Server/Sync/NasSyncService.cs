@@ -195,19 +195,20 @@ namespace Com.Scm.Nas.Sync
         /// <param name="terminalId"></param>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public async Task<SyncResult> PostLogAsync(NasLogFileDto dto,
-            [FromHeader] long terminalId,
-            [FromHeader] string token)
+        public async Task<SyncResult> PostLogAsync(NasLogFileDto dto)
         {
             if (dto == null)
             {
                 return SyncResult.Failure("上传对象为空！");
             }
 
-            var terminalToken = _TerminalHolder.GetTerminal(terminalId);
+            var token = _ScmHolder.GetToken();
+            TextUtils.IsLong("0");
+
+            var terminalToken = _TerminalHolder.GetTerminal(token.terminal_id);
             if (terminalToken == null || terminalToken.IsExpired())
             {
-                return null;
+                return SyncResult.Failure("无效的终端信息！");
             }
 
             var result = new SyncResult();

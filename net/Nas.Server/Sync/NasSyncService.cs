@@ -227,22 +227,6 @@ namespace Com.Scm.Nas.Sync
 
             result.SetFailure("不支持的操作：" + dto.opt);
             return result;
-            //var tmpFile = _EnvConfig.GetTempPath(dto.hash + ".tmp");
-            //if (!System.IO.File.Exists(tmpFile))
-            //{
-            //    return PostLogResult.Failure("上传文档不存在！");
-            //}
-
-            //var dstFile = _EnvConfig.GetUploadPath(dto.file);
-            //if (!FileUtils.Moveto(tmpFile, dstFile))
-            //{
-            //    return PostLogResult.Failure("上传文档移动异常！");
-            //}
-
-            //var dao = dto.Adapt<NasLogFileDao>();
-            //await _SqlClient.Insertable(dao).ExecuteCommandAsync();
-
-            //return PostLogResult.Success();
         }
 
         #region 创建文件
@@ -387,7 +371,7 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         private async Task<bool> DeleteDoc(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
         {
-            var dstFile = _EnvConfig.GetUploadPath(dto.path);
+            var dstFile = GetPhysicalPath(dto.path);
             FileUtils.DeleteDoc(dstFile);
 
             var docDao = await _SqlClient.Queryable<NasFileDocDao>()
@@ -412,7 +396,7 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         private async Task<bool> DeleteDir(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
         {
-            var dstFile = _EnvConfig.GetUploadPath(dto.path);
+            var dstFile = GetPhysicalPath(dto.path);
             FileUtils.DeleteDir(dstFile);
 
             var dirDao = await _SqlClient.Queryable<NasFileDirDao>()

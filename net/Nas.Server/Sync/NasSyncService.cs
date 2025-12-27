@@ -156,13 +156,15 @@ namespace Com.Scm.Nas.Sync
 
             var byPath = request.by_path;// !string.IsNullOrEmpty(request.path);
 
-            return await _SqlClient.Queryable<NasResFileDao>()
+            var items = await _SqlClient.Queryable<NasResFileDao>()
                 .Where(a => a.row_status == Enums.ScmRowStatusEnum.Enabled)
                 .WhereIF(byPath, a => a.path == request.path)
                 .WhereIF(!byPath, a => a.dir_id == request.dir_id)
                 .OrderBy(a => a.name, OrderByType.Asc)
                 .Select<NasResFileDto>()
                 .ToPageAsync(request.page, request.limit);
+
+            return items;
         }
 
         /// <summary>
@@ -257,6 +259,7 @@ namespace Com.Scm.Nas.Sync
                 return await CreateDir(token, dto, result);
             }
 
+            result.SetFailure("未知的文件类型：" + dto.type);
             return false;
         }
 
@@ -291,6 +294,7 @@ namespace Com.Scm.Nas.Sync
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
 
+            result.SetSuccess();
             return true;
         }
 
@@ -312,6 +316,7 @@ namespace Com.Scm.Nas.Sync
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
 
+            result.SetSuccess();
             return true;
         }
 
@@ -368,6 +373,7 @@ namespace Com.Scm.Nas.Sync
                 return await DeleteDoc(token, dto, result);
             }
 
+            result.SetFailure("未知的文件类型：" + dto.type);
             return false;
         }
 
@@ -393,6 +399,7 @@ namespace Com.Scm.Nas.Sync
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
 
+            result.SetSuccess();
             return true;
         }
 
@@ -420,6 +427,7 @@ namespace Com.Scm.Nas.Sync
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
 
+            result.SetSuccess();
             return true;
         }
 
@@ -472,6 +480,7 @@ namespace Com.Scm.Nas.Sync
                 return await MoveDir(dto, result);
             }
 
+            result.SetFailure("未知的文件类型：" + dto.type);
             return false;
         }
 
@@ -483,18 +492,22 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         private async Task<bool> MoveDoc(NasLogFileDto dto, SyncResult result)
         {
-            var srcFile = _EnvConfig.GetUploadPath(dto.src);
+            var srcFile = GetPath(dto.src);
             if (!FileUtils.ExistsDoc(srcFile))
             {
+                result.SetFailure($"来源文件 {dto.src} 不存在！");
                 return false;
             }
 
-            var dstFile = _EnvConfig.GetUploadPath(dto.path);
+            var dstFile = GetPath(dto.path);
             FileUtils.Moveto(srcFile, dstFile);
+
+            await AddDoc(dto);
 
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
 
+            result.SetSuccess();
             return true;
         }
 
@@ -518,6 +531,7 @@ namespace Com.Scm.Nas.Sync
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
 
+            result.SetSuccess();
             return true;
         }
         #endregion
@@ -546,6 +560,7 @@ namespace Com.Scm.Nas.Sync
                 return await CopyDir(dto, result);
             }
 
+            result.SetFailure("未知的文件类型：" + dto.type);
             return false;
         }
 
@@ -567,29 +582,103 @@ namespace Com.Scm.Nas.Sync
             var dstFile = GetPath(dto.path);
             FileUtils.Copyto(srcFile, dstFile);
 
-            await AddFile(dto);
+            await AddDoc(dto);
 
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
 
+            result.SetSuccess();
             return true;
         }
 
-        private static string GetDir(string file)
+        /// <summary>
+        /// 移动目录
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private async Task<bool> CopyDir(NasLogFileDto dto, SyncResult result)
         {
-            var idx = file.LastIndexOf('/');
-            if (idx > 0)
+            var srcFile = _EnvConfig.GetUploadPath(dto.src);
+            if (!Directory.Exists(srcFile))
             {
-                return file.Substring(0, idx);
+                return false;
             }
-            return "";
+
+            var dstFile = _EnvConfig.GetUploadPath(dto.path);
+            FileUtils.Copyto(srcFile, dstFile);
+
+            var dao = dto.Adapt<NasLogFileDao>();
+            await _SqlClient.Insertable(dao).ExecuteCommandAsync();
+
+            result.SetSuccess();
+            return true;
+        }
+        #endregion
+
+        #region 更名文件
+        /// <summary>
+        /// 更名文件
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private async Task<bool> RenameFile(NasLogFileDto dto, SyncResult result)
+        {
+            if (dto == null)
+            {
+                return false;
+            }
+
+            if (dto.type == NasTypeEnums.Doc)
+            {
+                return await RenameDoc(dto, result);
+            }
+
+            if (dto.type == NasTypeEnums.Dir)
+            {
+                return await RenameDir(dto, result);
+            }
+
+            result.SetFailure("未知的文件类型：" + dto.type);
+            return false;
         }
 
-        private async Task AddFile(NasLogFileDto dto)
+        /// <summary>
+        /// 移动文档
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private async Task<bool> RenameDoc(NasLogFileDto dto, SyncResult result)
         {
-            var docDao = await GetDocDaoByPath(dto.path);
+            var srcFile = GetPath(dto.src);
+            if (!FileUtils.ExistsDoc(srcFile))
+            {
+                result.SetFailure($"来源文档 {dto.src} 不存在！");
+                return false;
+            }
+
+            var dstFile = GetPath(dto.path);
+            FileUtils.RenameTo(srcFile, dstFile);
+
+            await RenameDoc(dto);
+
+            var dao = dto.Adapt<NasLogFileDao>();
+            await _SqlClient.Insertable(dao).ExecuteCommandAsync();
+
+            result.SetSuccess();
+            return true;
+        }
+
+        private async Task RenameDoc(NasLogFileDto dto)
+        {
+            var docDao = await GetDocDaoByPath(dto.src);
             if (docDao != null)
             {
+                docDao.name = dto.name;
+                docDao.path = dto.path;
+                await _SqlClient.Updateable(docDao).ExecuteCommandAsync();
                 return;
             }
 
@@ -615,33 +704,24 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        private async Task<bool> CopyDir(NasLogFileDto dto, SyncResult result)
+        private async Task<bool> RenameDir(NasLogFileDto dto, SyncResult result)
         {
-            var srcFile = _EnvConfig.GetUploadPath(dto.src);
-            if (!Directory.Exists(srcFile))
+            var srcFile = GetPath(dto.src);
+            if (!FileUtils.ExistsDir(srcFile))
             {
+                result.SetFailure($"来源目录 {dto.src} 不存在！");
                 return false;
             }
 
-            var dstFile = _EnvConfig.GetUploadPath(dto.path);
-            FileUtils.Copyto(srcFile, dstFile);
+            var dstFile = GetPath(dto.path);
+            FileUtils.RenameTo(srcFile, dstFile);
+
+            await RenameDoc(dto);
 
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
 
-            return true;
-        }
-        #endregion
-
-        #region 更名文件
-        /// <summary>
-        /// 更名文件
-        /// </summary>
-        /// <param name="dto"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        private async Task<bool> RenameFile(NasLogFileDto dto, SyncResult result)
-        {
+            result.SetSuccess();
             return true;
         }
         #endregion
@@ -728,6 +808,40 @@ namespace Com.Scm.Nas.Sync
         private string GetPath(string path)
         {
             return _EnvConfig.GetUploadPath(path);
+        }
+
+        private static string GetDir(string file)
+        {
+            var idx = file.LastIndexOf('/');
+            if (idx > 0)
+            {
+                return file.Substring(0, idx);
+            }
+            return "";
+        }
+
+        private async Task AddDoc(NasLogFileDto dto)
+        {
+            var docDao = await GetDocDaoByPath(dto.path);
+            if (docDao != null)
+            {
+                return;
+            }
+
+            var dirDao = await GetDirDaoByPath(GetDir(dto.path));
+            var dirId = 0L;
+            if (dirDao != null)
+            {
+                dirId = dirDao.id;
+            }
+
+            docDao = new NasResFileDao();
+            docDao.type = dto.type;
+            docDao.name = dto.name;
+            docDao.path = dto.path;
+            docDao.dir_id = dirId;
+
+            await _SqlClient.Insertable(docDao).ExecuteCommandAsync();
         }
     }
 

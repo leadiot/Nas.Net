@@ -557,19 +557,56 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         private async Task<bool> CopyDoc(NasLogFileDto dto, SyncResult result)
         {
-            var srcFile = _EnvConfig.GetUploadPath(dto.src);
+            var srcFile = GetPath(dto.src);
             if (!FileUtils.ExistsDoc(srcFile))
             {
+                result.SetFailure($"来源文件 {dto.src} 不存在！");
                 return false;
             }
 
-            var dstFile = _EnvConfig.GetUploadPath(dto.path);
+            var dstFile = GetPath(dto.path);
             FileUtils.Copyto(srcFile, dstFile);
+
+            await AddFile(dto);
 
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
 
             return true;
+        }
+
+        private static string GetDir(string file)
+        {
+            var idx = file.LastIndexOf('/');
+            if (idx > 0)
+            {
+                return file.Substring(0, idx);
+            }
+            return "";
+        }
+
+        private async Task AddFile(NasLogFileDto dto)
+        {
+            var docDao = await GetDocDaoByPath(dto.path);
+            if (docDao != null)
+            {
+                return;
+            }
+
+            var dirDao = await GetDirDaoByPath(GetDir(dto.path));
+            var dirId = 0L;
+            if (dirDao != null)
+            {
+                dirId = dirDao.id;
+            }
+
+            docDao = new NasResFileDao();
+            docDao.type = dto.type;
+            docDao.name = dto.name;
+            docDao.path = dto.path;
+            docDao.dir_id = dirId;
+
+            await _SqlClient.Insertable(docDao).ExecuteCommandAsync();
         }
 
         /// <summary>
@@ -626,7 +663,7 @@ namespace Com.Scm.Nas.Sync
         /// </summary>
         /// <param name="path">虚拟绝对路径</param>
         /// <returns></returns>
-        private async Task<NasFileDocDao> GetDocDaoByPath(string path)
+        private async Task<NasResFileDao> GetDocDaoByPath(string path)
         {
             return await _SqlClient.Queryable<NasFileDocDao>()
                 .Where(a => a.user_id == 0 && a.path == path)

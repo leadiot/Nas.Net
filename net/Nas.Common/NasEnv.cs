@@ -46,6 +46,11 @@
         public const string LogUrl = "/NasSync/Log";
 
         /// <summary>
+        /// 获取文件列表
+        /// </summary>
+        public const string FileUrl = "/NasSync/File";
+
+        /// <summary>
         /// 同步操作路径
         /// </summary>
         public const string SyncUrl = "/NasSync/Sync";

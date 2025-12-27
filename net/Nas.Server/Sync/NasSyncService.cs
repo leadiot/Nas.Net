@@ -10,6 +10,7 @@ using Com.Scm.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SqlSugar;
+using System.Text;
 
 namespace Com.Scm.Nas.Sync
 {
@@ -18,7 +19,7 @@ namespace Com.Scm.Nas.Sync
     /// </summary>
     [ApiExplorerSettings(GroupName = "Nas")]
     [AllowAnonymous]
-    public class NasSyncService : ApiService
+    public class NasSyncService : AppService
     {
         private ScmContextHolder _ScmHolder;
         private ITerminalHolder _TerminalHolder;
@@ -54,6 +55,21 @@ namespace Com.Scm.Nas.Sync
         }
 
         /// <summary>
+        /// 检查指定HASH是否存在
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <returns></returns>
+        [HttpGet("{hash}")]
+        public async Task<bool> GetQueryAsync(string hash)
+        {
+            var exists = await _SqlClient.Queryable<NasFileDocDao>()
+                .Where(a => a.hash == hash)
+                .AnyAsync();
+
+            return true;
+        }
+
+        /// <summary>
         /// 获取同步日志（按时间升序排列）
         /// </summary>
         /// <param name="request"></param>
@@ -82,17 +98,21 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<ScmSearchPageResponse<NasFileDirDto>> GetDirAsync(GetDirRequest request)
         {
-            var terminalId = _ScmHolder.GetToken().terminal_id;
+            //var terminalId = _ScmHolder.GetToken().terminal_id;
 
-            var terminal = _TerminalHolder.GetTerminal(terminalId);
-            if (terminal == null || terminal.IsExpired())
-            {
-                return null;
-            }
+            //var terminal = _TerminalHolder.GetTerminal(terminalId);
+            //if (terminal == null || terminal.IsExpired())
+            //{
+            //    return null;
+            //}
+
+            var byPath = request.by_path;// !string.IsNullOrEmpty(request.path);
 
             return await _SqlClient.Queryable<NasFileDirDao>()
-                .Where(a => a.dir_id == request.id && a.row_status == Enums.ScmRowStatusEnum.Enabled)
-                .OrderBy(a => a.id, OrderByType.Asc)
+                .Where(a => a.row_status == Enums.ScmRowStatusEnum.Enabled)
+                .WhereIF(byPath, a => a.path == request.path)
+                .WhereIF(!byPath, a => a.dir_id == request.dir_id)
+                .OrderBy(a => a.name, OrderByType.Asc)
                 .Select<NasFileDirDto>()
                 .ToPageAsync(request.page, request.limit);
         }
@@ -104,89 +124,24 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<ScmSearchPageResponse<NasFileDocDto>> GetDocAsync(GetDocRequest request)
         {
-            var terminalId = _ScmHolder.GetToken().terminal_id;
+            //var terminalId = _ScmHolder.GetToken().terminal_id;
 
-            var terminal = _TerminalHolder.GetTerminal(terminalId);
-            if (terminal == null || terminal.IsExpired())
-            {
-                return null;
-            }
+            //var terminal = _TerminalHolder.GetTerminal(terminalId);
+            //if (terminal == null || terminal.IsExpired())
+            //{
+            //    return null;
+            //}
+
+            var byPath = request.by_path;// !string.IsNullOrEmpty(request.path);
 
             return await _SqlClient.Queryable<NasFileDocDao>()
-                .Where(a => a.dir_id == request.id && a.row_status == Enums.ScmRowStatusEnum.Enabled)
-                .OrderBy(a => a.id, OrderByType.Asc)
+                .Where(a => a.row_status == Enums.ScmRowStatusEnum.Enabled)
+                .WhereIF(byPath, a => a.path == request.path)
+                .WhereIF(!byPath, a => a.dir_id == request.dir_id)
+                .OrderBy(a => a.name, OrderByType.Asc)
                 .Select<NasFileDocDto>()
                 .ToPageAsync(request.page, request.limit);
         }
-
-        #region 文件上传
-        /// <summary>
-        /// 小文件上传
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<ScmUploadResponse> UploadFileAsync(ScmUploadRequest request)
-        {
-            var response = new ScmUploadResponse();
-
-            var file = request.file;
-            if (file == null)
-            {
-                response.SetFailure("上传文件为空！");
-                return response;
-            }
-
-            var name = file.Name;
-
-            //var exts = Path.GetExtension(file.FileName).ToLower();
-            //if (!IsAcceptExts(exts))
-            //{
-            //    response.SetFailure("不支持的文件类型！");
-            //    return response;
-            //}
-
-            var dstFile = _EnvConfig.GetTempPath(name);
-            using (var stream = System.IO.File.OpenWrite(dstFile))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            response.SetSuccess($"文件上传成功！");
-            return response;
-        }
-
-        #region 大文件上传
-        /// <summary>
-        /// 分块上传
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<ScmUploadResponse> UploadChunkAsync(ScmUploadRequest request)
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// 上传校验
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<ScmUploadResponse> UploadCheckAsync(ScmUploadRequest request)
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// 文件合并
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<ScmUploadResponse> UploadMergeAsync(ScmUploadRequest request)
-        {
-            return null;
-        }
-        #endregion
-        #endregion
 
         /// <summary>
         /// 上传同步日志
@@ -195,15 +150,14 @@ namespace Com.Scm.Nas.Sync
         /// <param name="terminalId"></param>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public async Task<SyncResult> PostLogAsync(NasLogFileDto dto)
+        public async Task<SyncResult> PostSyncAsync(NasLogFileDto dto, [FromHeader] string appToken)
         {
             if (dto == null)
             {
                 return SyncResult.Failure("上传对象为空！");
             }
 
-            var token = _ScmHolder.GetToken();
-            TextUtils.IsLong("0");
+            var token = GetToken(appToken);
 
             var terminalToken = _TerminalHolder.GetTerminal(token.terminal_id);
             if (terminalToken == null || terminalToken.IsExpired())
@@ -292,13 +246,18 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         private async Task<bool> CreateDoc(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
         {
-            var tmpFile = _EnvConfig.GetTempPath(dto.hash + ".tmp");
+            if (string.IsNullOrEmpty(dto.src))
+            {
+                return false;
+            }
+
+            var tmpFile = _EnvConfig.GetTempPath(dto.src);
             if (!File.Exists(tmpFile))
             {
                 return false;
             }
 
-            var dstFile = _EnvConfig.GetUploadPath(dto.path);
+            var dstFile = GetPath(dto.path);
             if (!FileUtils.Moveto(tmpFile, dstFile))
             {
                 SyncResult.Failure("上传文档移动异常！");
@@ -667,5 +626,56 @@ namespace Com.Scm.Nas.Sync
 
             return _EnvConfig.GetUploadPath(path);
         }
+
+        /// <summary>
+        /// 适用于应用，使用绑定登录
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="holder"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        private NasToken GetToken(string token)
+        {
+            if (token.StartsWith(ScmToken.PRE_APP))
+            {
+                token = token.Substring(ScmToken.PRE_APP.Length);
+            }
+
+            var bytes = Convert.FromBase64String(token);
+            token = Encoding.UTF8.GetString(bytes);
+
+            var arr = token.Split(":");
+            var nasToken = new NasToken();
+            if (arr.Length == 3)
+            {
+                var tmp = arr[0];
+                if (TextUtils.IsLong(tmp))
+                {
+                    nasToken.terminal_id = long.Parse(tmp);
+                }
+
+                tmp = arr[1];
+                if (TextUtils.IsLong(tmp))
+                {
+                    nasToken.time = long.Parse(tmp);
+                }
+
+                nasToken.digest = arr[2];
+            }
+
+            return nasToken;
+        }
+
+        private string GetPath(string path)
+        {
+            return _EnvConfig.GetUploadPath(path);
+        }
+    }
+
+    public class NasToken
+    {
+        public long terminal_id { get; set; }
+        public long time { get; set; }
+        public string digest { get; set; }
     }
 }

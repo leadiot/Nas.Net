@@ -16,6 +16,7 @@ namespace Com.Scm.Api.Controllers
             _EnvConfig = envConfig;
         }
 
+        #region 小文件上传
         [HttpPost("file")]
         public async Task<ScmUploadResponse> UploadFileAsync(ScmUploadRequest request)
         {
@@ -28,7 +29,7 @@ namespace Com.Scm.Api.Controllers
                 return response;
             }
 
-            var name = file.Name;
+            var name = file.FileName;
 
             //var exts = Path.GetExtension(file.FileName).ToLower();
             //if (!IsAcceptExts(exts))
@@ -46,5 +47,38 @@ namespace Com.Scm.Api.Controllers
             response.SetSuccess($"文件上传成功！");
             return response;
         }
+        #endregion
+
+        #region 大文件上传
+        /// <summary>
+        /// 分块上传
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<ScmUploadResponse> UploadChunkAsync(ScmUploadRequest request)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// 上传校验
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<ScmUploadResponse> UploadCheckAsync(ScmUploadRequest request)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// 文件合并
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public async Task<ScmUploadResponse> UploadMergeAsync(ScmUploadRequest request)
+        {
+            return null;
+        }
+        #endregion
     }
 }

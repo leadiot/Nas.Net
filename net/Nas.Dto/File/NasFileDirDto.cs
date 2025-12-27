@@ -14,11 +14,11 @@ namespace Com.Scm.Nas.Res
         [Required]
         public long terminal_id { get; set; }
 
-        /// <summary>
-        /// 驱动ID
-        /// </summary>
-        [Required]
-        public long drive_id { get; set; }
+        ///// <summary>
+        ///// 驱动ID
+        ///// </summary>
+        //[Required]
+        //public long drive_id { get; set; }
 
         /// <summary>
         /// 名称

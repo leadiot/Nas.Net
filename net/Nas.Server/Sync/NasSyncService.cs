@@ -1,5 +1,6 @@
 ﻿using Com.Scm.Api;
 using Com.Scm.Config;
+using Com.Scm.Nas.File;
 using Com.Scm.Nas.Log;
 using Com.Scm.Nas.Res;
 using Com.Scm.Nas.Sync.Dvo;
@@ -96,7 +97,7 @@ namespace Com.Scm.Nas.Sync
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<ScmSearchPageResponse<NasFileDirDto>> GetDirAsync(GetDirRequest request)
+        public async Task<ScmSearchPageResponse<NasResFileDto>> GetDirAsync(GetDirRequest request)
         {
             //var terminalId = _ScmHolder.GetToken().terminal_id;
 
@@ -108,12 +109,12 @@ namespace Com.Scm.Nas.Sync
 
             var byPath = request.by_path;// !string.IsNullOrEmpty(request.path);
 
-            return await _SqlClient.Queryable<NasFileDirDao>()
-                .Where(a => a.row_status == Enums.ScmRowStatusEnum.Enabled)
+            return await _SqlClient.Queryable<NasResFileDao>()
+                .Where(a => a.type == NasTypeEnums.Dir && a.row_status == Enums.ScmRowStatusEnum.Enabled)
                 .WhereIF(byPath, a => a.path == request.path)
                 .WhereIF(!byPath, a => a.dir_id == request.dir_id)
                 .OrderBy(a => a.name, OrderByType.Asc)
-                .Select<NasFileDirDto>()
+                .Select<NasResFileDto>()
                 .ToPageAsync(request.page, request.limit);
         }
 
@@ -122,7 +123,7 @@ namespace Com.Scm.Nas.Sync
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<ScmSearchPageResponse<NasFileDocDto>> GetDocAsync(GetDocRequest request)
+        public async Task<ScmSearchPageResponse<NasResFileDto>> GetDocAsync(GetDocRequest request)
         {
             //var terminalId = _ScmHolder.GetToken().terminal_id;
 
@@ -134,12 +135,33 @@ namespace Com.Scm.Nas.Sync
 
             var byPath = request.by_path;// !string.IsNullOrEmpty(request.path);
 
-            return await _SqlClient.Queryable<NasFileDocDao>()
+            return await _SqlClient.Queryable<NasResFileDao>()
+                .Where(a => a.type == NasTypeEnums.Doc && a.row_status == Enums.ScmRowStatusEnum.Enabled)
+                .WhereIF(byPath, a => a.path == request.path)
+                .WhereIF(!byPath, a => a.dir_id == request.dir_id)
+                .OrderBy(a => a.name, OrderByType.Asc)
+                .Select<NasResFileDto>()
+                .ToPageAsync(request.page, request.limit);
+        }
+
+        public async Task<ScmSearchPageResponse<NasResFileDto>> GetFileAsync(GetDocRequest request)
+        {
+            //var terminalId = _ScmHolder.GetToken().terminal_id;
+
+            //var terminal = _TerminalHolder.GetTerminal(terminalId);
+            //if (terminal == null || terminal.IsExpired())
+            //{
+            //    return null;
+            //}
+
+            var byPath = request.by_path;// !string.IsNullOrEmpty(request.path);
+
+            return await _SqlClient.Queryable<NasResFileDao>()
                 .Where(a => a.row_status == Enums.ScmRowStatusEnum.Enabled)
                 .WhereIF(byPath, a => a.path == request.path)
                 .WhereIF(!byPath, a => a.dir_id == request.dir_id)
                 .OrderBy(a => a.name, OrderByType.Asc)
-                .Select<NasFileDocDto>()
+                .Select<NasResFileDto>()
                 .ToPageAsync(request.page, request.limit);
         }
 
@@ -252,7 +274,7 @@ namespace Com.Scm.Nas.Sync
             }
 
             var tmpFile = _EnvConfig.GetTempPath(dto.src);
-            if (!File.Exists(tmpFile))
+            if (!FileUtils.ExistsDoc(tmpFile))
             {
                 return false;
             }
@@ -462,7 +484,7 @@ namespace Com.Scm.Nas.Sync
         private async Task<bool> MoveDoc(NasLogFileDto dto, SyncResult result)
         {
             var srcFile = _EnvConfig.GetUploadPath(dto.src);
-            if (!File.Exists(srcFile))
+            if (!FileUtils.ExistsDoc(srcFile))
             {
                 return false;
             }
@@ -536,7 +558,7 @@ namespace Com.Scm.Nas.Sync
         private async Task<bool> CopyDoc(NasLogFileDto dto, SyncResult result)
         {
             var srcFile = _EnvConfig.GetUploadPath(dto.src);
-            if (!File.Exists(srcFile))
+            if (!FileUtils.ExistsDoc(srcFile))
             {
                 return false;
             }

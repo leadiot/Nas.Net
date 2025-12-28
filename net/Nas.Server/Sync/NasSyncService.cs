@@ -799,7 +799,7 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         private long CreateDirDao(ScmTerminalInfo token, string path)
         {
-            var tmp = "" + NasEnv.WebSeparator;
+            var tmp = "";
             var dirId = NasEnv.DEF_DIR_ID;
             path = path.Trim(NasEnv.WebSeparator);
             foreach (var arr in path.Split(NasEnv.WebSeparator))
@@ -809,7 +809,7 @@ namespace Com.Scm.Nas.Sync
                     continue;
                 }
 
-                tmp += arr;
+                tmp += NasEnv.WebSeparator + arr;
                 var dao = _SqlClient.Queryable<NasResFileDao>().Where(a => a.path == tmp).First();
                 if (dao == null)
                 {

@@ -27,30 +27,20 @@ namespace Com.Scm.Nas
     {
         None,
         /// <summary>
-        /// 全量上传
+        /// 仅上传
         /// </summary>
-        [Description("全量上传")]
-        AllUpload,
-        /// <summary>
-        /// 增量上传
-        /// </summary>
-        [Description("增量上传")]
-        IncUpload,
+        [Description("仅上传")]
+        Upload,
         /// <summary>
         /// 双向同步
         /// </summary>
         [Description("双向同步")]
         Sync,
         /// <summary>
-        /// 全量下载
+        /// 仅下载
         /// </summary>
-        [Description("全量下载")]
-        AllDownload,
-        /// <summary>
-        /// 增量下载
-        /// </summary>
-        [Description("增量下载")]
-        IncDownload
+        [Description("仅下载")]
+        Download
     }
 
     /// <summary>

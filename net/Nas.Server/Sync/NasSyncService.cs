@@ -165,6 +165,7 @@ namespace Com.Scm.Nas.Sync
                 .Where(a => a.row_status == Enums.ScmRowStatusEnum.Enabled)
                 .WhereIF(byPath, a => a.path == request.path)
                 .WhereIF(!byPath, a => a.dir_id == request.dir_id)
+                .OrderBy(a => a.type, OrderByType.Asc)
                 .OrderBy(a => a.name, OrderByType.Asc)
                 .Select<NasResFileDto>()
                 .ToPageAsync(request.page, request.limit);
@@ -284,7 +285,7 @@ namespace Com.Scm.Nas.Sync
                 await DeleteDocDao(docDao);
             }
 
-            await AddLogFile(token, dto);
+            await AddLogFileByDto(token, dto);
 
             result.SetSuccess();
             return true;
@@ -313,7 +314,7 @@ namespace Com.Scm.Nas.Sync
                 await _SqlClient.Deleteable(dirDao).ExecuteCommandAsync();
             }
 
-            await AddLogFile(token, dto);
+            await AddLogFileByDto(token, dto);
 
             result.SetSuccess();
             return true;
@@ -398,11 +399,11 @@ namespace Com.Scm.Nas.Sync
                 return false;
             }
 
-            await AddCreateFile(token, dto);
+            var dirId = CreateDirDao(token, dto.path);
 
-            await AddLogFile(token, dto);
+            await AddLogFileByDto(token, dto);
 
-            result.SetSuccess();
+            result.SetSuccess(dirId);
             return true;
         }
 
@@ -422,37 +423,31 @@ namespace Com.Scm.Nas.Sync
                 Directory.CreateDirectory(tmpFile);
             }
 
-            await AddCreateFile(token, dto);
+            var dirId = CreateDirDao(token, GetParentDir(dto.path));
 
-            await AddLogFile(token, dto);
+            var docDao = await AddCreateFile(token, dto, dirId);
 
-            result.SetSuccess();
+            await AddLogFileByDto(token, dto);
+
+            result.SetSuccess(docDao.id);
             return true;
         }
 
-        private async Task AddCreateFile(ScmTerminalInfo token, NasLogFileDto dto)
+        private async Task<NasResFileDao> AddCreateFile(ScmTerminalInfo token, NasLogFileDto dto, long dirId)
         {
             var docDao = await GetFileDaoByPath(dto.path);
-            if (docDao != null)
+            if (docDao == null)
             {
-                return;
+                docDao = new NasResFileDao();
+                docDao.type = dto.type;
+                docDao.name = dto.name;
+                docDao.path = dto.path;
+                docDao.dir_id = dirId;
+                docDao.PrepareCreate(token.user_id);
+
+                await _SqlClient.Insertable(docDao).ExecuteCommandAsync();
             }
-
-            var dirDao = await GetFileDaoByPath(GetDir(dto.path));
-            var dirId = 0L;
-            if (dirDao != null)
-            {
-                dirId = dirDao.id;
-            }
-
-            docDao = new NasResFileDao();
-            docDao.type = dto.type;
-            docDao.name = dto.name;
-            docDao.path = dto.path;
-            docDao.dir_id = dirId;
-            docDao.PrepareCreate(token.user_id);
-
-            await _SqlClient.Insertable(docDao).ExecuteCommandAsync();
+            return docDao;
         }
         #endregion
 
@@ -506,12 +501,13 @@ namespace Com.Scm.Nas.Sync
             var dstFile = GetPhysicalPath(dto.path);
             FileUtils.Moveto(srcFile, dstFile);
 
-            await AddCreateFile(token, dto);
+            var dirId = CreateDirDao(token, GetParentDir(dto.path));
+            var docDao = await AddCreateFile(token, dto, dirId);
 
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
 
-            result.SetSuccess();
+            result.SetSuccess(docDao.id);
             return true;
         }
 
@@ -535,12 +531,12 @@ namespace Com.Scm.Nas.Sync
             var dstFile = GetPhysicalPath(dto.path);
             FileUtils.Moveto(srcFile, dstFile);
 
-            await AddCreateFile(token, dto);
+            var dirId = CreateDirDao(token, dto.path);
 
             var dao = dto.Adapt<NasLogFileDao>();
             await _SqlClient.Insertable(dao).ExecuteCommandAsync();
 
-            result.SetSuccess();
+            result.SetSuccess(dirId);
             return true;
         }
         #endregion
@@ -596,11 +592,12 @@ namespace Com.Scm.Nas.Sync
             var dstFile = GetPhysicalPath(dto.path);
             FileUtils.Copyto(srcFile, dstFile);
 
-            await AddCreateFile(token, dto);
+            var dirId = CreateDirDao(token, GetParentDir(dto.path));
+            var docDao = await AddCreateFile(token, dto, dirId);
 
-            await AddLogFile(token, dto);
+            await AddLogFileByDto(token, dto);
 
-            result.SetSuccess();
+            result.SetSuccess(docDao.id);
             return true;
         }
 
@@ -625,11 +622,11 @@ namespace Com.Scm.Nas.Sync
             var dstFile = GetPhysicalPath(dto.path);
             FileUtils.Copyto(srcFile, dstFile);
 
-            await AddCreateFile(token, dto);
+            var dirId = CreateDirDao(token, dto.path);
 
-            await AddLogFile(token, dto);
+            await AddLogFileByDto(token, dto);
 
-            result.SetSuccess();
+            result.SetSuccess(dirId);
             return true;
         }
         #endregion
@@ -686,7 +683,7 @@ namespace Com.Scm.Nas.Sync
 
             await AddRenameFile(token, dto);
 
-            await AddLogFile(token, dto);
+            await AddLogFileByDto(token, dto);
 
             result.SetSuccess();
             return true;
@@ -714,7 +711,7 @@ namespace Com.Scm.Nas.Sync
 
             await AddRenameFile(token, dto);
 
-            await AddLogFile(token, dto);
+            await AddLogFileByDto(token, dto);
 
             result.SetSuccess();
             return true;
@@ -731,7 +728,7 @@ namespace Com.Scm.Nas.Sync
                 return;
             }
 
-            var dirDao = await GetFileDaoByPath(GetDir(dto.path));
+            var dirDao = await GetFileDaoByPath(GetParentDir(dto.path));
             var dirId = dirDao != null ? dirDao.id : 0;
 
             docDao = new NasResFileDao();
@@ -744,6 +741,7 @@ namespace Com.Scm.Nas.Sync
         }
         #endregion
 
+        #region 公共方法
         /// <summary>
         /// 根据路径获取文件对象
         /// </summary>
@@ -758,6 +756,7 @@ namespace Com.Scm.Nas.Sync
 
         /// <summary>
         /// 获取物理路径
+        /// （服务端路径，不可与客户端方法相同）
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
@@ -776,14 +775,58 @@ namespace Com.Scm.Nas.Sync
             return _EnvConfig.GetUploadPath(path);
         }
 
-        private static string GetDir(string file)
+        /// <summary>
+        /// 获取上级目录
+        /// </summary>
+        /// <param name="file">虚拟绝对路径</param>
+        /// <returns></returns>
+        private static string GetParentDir(string file)
         {
-            var idx = file.LastIndexOf('/');
+            file = file.TrimEnd(NasEnv.WebSeparator);
+            var idx = file.LastIndexOf(NasEnv.WebSeparator);
             if (idx > 0)
             {
                 return file.Substring(0, idx);
             }
-            return "";
+            return "" + NasEnv.WebSeparator;
+        }
+
+        /// <summary>
+        /// 根据路径级联创建目录
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private long CreateDirDao(ScmTerminalInfo token, string path)
+        {
+            var tmp = "" + NasEnv.WebSeparator;
+            var dirId = NasEnv.DEF_DIR_ID;
+            path = path.Trim(NasEnv.WebSeparator);
+            foreach (var arr in path.Split(NasEnv.WebSeparator))
+            {
+                if (string.IsNullOrEmpty(arr))
+                {
+                    continue;
+                }
+
+                tmp += arr;
+                var dao = _SqlClient.Queryable<NasResFileDao>().Where(a => a.path == tmp).First();
+                if (dao == null)
+                {
+                    dao = new NasResFileDao
+                    {
+                        type = NasTypeEnums.Dir,
+                        name = arr,
+                        path = tmp,
+                        dir_id = dirId, // 根目录
+                    };
+                    dao.PrepareCreate(token.user_id);
+                    _SqlClient.Insertable(dao).ExecuteCommand();
+                }
+                dirId = dao.id;
+            }
+
+            return dirId;
         }
 
         /// <summary>
@@ -792,7 +835,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="token"></param>
         /// <param name="dto"></param>
         /// <returns></returns>
-        private async Task AddLogFile(ScmTerminalInfo token, NasLogFileDto dto)
+        private async Task AddLogFileByDto(ScmTerminalInfo token, NasLogFileDto dto)
         {
             var dao = dto.Adapt<NasLogFileDao>();
             dao.PrepareCreate(token.user_id);
@@ -837,6 +880,7 @@ namespace Com.Scm.Nas.Sync
 
             return nasToken;
         }
+        #endregion
     }
 
     public class NasToken

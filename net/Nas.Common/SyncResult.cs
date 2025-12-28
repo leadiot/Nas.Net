@@ -6,8 +6,19 @@
         public int code { get; set; }
         public string message { get; set; }
 
+        /// <summary>
+        /// Nas对象ID
+        /// </summary>
+        public long id { get; set; }
+
         public void SetSuccess()
         {
+            success = true;
+        }
+
+        public void SetSuccess(long id)
+        {
+            this.id = id;
             success = true;
         }
 

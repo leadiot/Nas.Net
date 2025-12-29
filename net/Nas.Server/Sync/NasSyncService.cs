@@ -77,16 +77,17 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<ScmSearchPageResponse<NasLogFileDto>> GetLogAsync(GetLogRequest request)
         {
-            var terminalId = _ScmHolder.GetToken().terminal_id;
+            //var terminalId = _ScmHolder.GetToken().terminal_id;
 
-            var terminal = _TerminalHolder.GetTerminal(terminalId);
-            if (terminal == null || terminal.IsExpired())
-            {
-                return null;
-            }
+            //var terminal = _TerminalHolder.GetTerminal(terminalId);
+            //if (terminal == null || terminal.IsExpired())
+            //{
+            //    return null;
+            //}
+            var driveId = request.drive_id;
 
             return await _SqlClient.Queryable<NasLogFileDao>()
-                .Where(a => a.row_status == Enums.ScmRowStatusEnum.Enabled)
+                .Where(a => a.drive_id != driveId && a.row_status == Enums.ScmRowStatusEnum.Enabled && a.id > request.id)
                 .OrderBy(a => a.id, OrderByType.Asc)
                 .Select<NasLogFileDto>()
                 .ToPageAsync(request.page, request.limit);

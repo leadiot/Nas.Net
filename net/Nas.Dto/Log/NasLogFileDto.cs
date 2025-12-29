@@ -32,18 +32,6 @@ namespace Com.Scm.Nas.Log
         public NasTypeEnums type { get; set; }
 
         /// <summary>
-        /// 操作类型
-        /// </summary>
-        [Required]
-        public NasOptEnums opt { get; set; }
-
-        /// <summary>
-        /// 同步方向
-        /// </summary>
-        [Required]
-        public NasDirEnums dir { get; set; }
-
-        /// <summary>
         /// 文件名称
         /// </summary>
         public string name { get; set; }
@@ -65,6 +53,18 @@ namespace Com.Scm.Nas.Log
         /// 文件大小
         /// </summary>
         public long size { get; set; }
+
+        /// <summary>
+        /// 操作类型
+        /// </summary>
+        [Required]
+        public NasOptEnums opt { get; set; }
+
+        /// <summary>
+        /// 同步方向
+        /// </summary>
+        [Required]
+        public NasDirEnums dir { get; set; }
 
         /// <summary>
         /// 来源文件

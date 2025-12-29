@@ -151,10 +151,10 @@ namespace Com.Scm.Api
 
             AppUtils.ServiceProvider = app.Services;
 
-            if (app.Environment.IsDevelopment())
-            {
+            //if (app.Environment.IsDevelopment())
+            //{
                 app.UseSwaggerSetup(swaggerConfig);
-            }
+            //}
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

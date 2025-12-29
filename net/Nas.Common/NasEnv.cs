@@ -85,7 +85,7 @@
         /// <summary>
         /// 当前系统路径分隔符
         /// </summary>
-        public static readonly char DirSeparator = System.IO.Path.PathSeparator;
+        public static readonly char DirSeparator = System.IO.Path.DirectorySeparatorChar;
 
         /// <summary>
         /// 网络路径分隔符

@@ -55,6 +55,7 @@ namespace Com.Scm.Api.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
+        [HttpPost("chunk")]
         public async Task<ScmUploadResponse> UploadChunkAsync(ScmUploadRequest request)
         {
             return null;
@@ -65,6 +66,7 @@ namespace Com.Scm.Api.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
+        [HttpPost("check")]
         public async Task<ScmUploadResponse> UploadCheckAsync(ScmUploadRequest request)
         {
             return null;
@@ -75,6 +77,7 @@ namespace Com.Scm.Api.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
+        [HttpPost("merge")]
         public async Task<ScmUploadResponse> UploadMergeAsync(ScmUploadRequest request)
         {
             return null;

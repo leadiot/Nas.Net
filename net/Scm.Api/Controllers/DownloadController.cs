@@ -1,6 +1,7 @@
 ﻿using Com.Scm.Config;
 using Com.Scm.Controllers;
 using Com.Scm.Http;
+using Com.Scm.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,13 +21,16 @@ namespace Com.Scm.Api.Controllers
         /// <summary>
         /// 下载服务器上的物理文件
         /// </summary>
-        /// <param name="fileName">要下载的文件名（含扩展名）</param>
+        /// <param name="path">要下载的文件名（含扩展名）</param>
         /// <returns>文件流</returns>
         [HttpGet("File")]
-        public IActionResult DownloadSmallFile(string fileName)
+        [HttpGet("Small")]
+        public IActionResult DownloadSmallFile(string path)
         {
+            LogUtils.Debug("小文件下载：" + path);
+
             // 1. 定义文件存储的根路径
-            var filePath = _EnvConfig.GetUploadPath(fileName);
+            var filePath = _EnvConfig.GetUploadPath(path);
 
             // 2. 校验文件是否存在
             if (!System.IO.File.Exists(filePath))
@@ -42,19 +46,25 @@ namespace Com.Scm.Api.Controllers
         }
 
         [HttpGet("Large")]
-        public async Task<IActionResult> DownloadLargeFile(string fileName)
+        public async Task<IActionResult> DownloadLargeFile(string path)
         {
-            var filePath = _EnvConfig.GetUploadPath(fileName);
+            LogUtils.Debug("大文件下载：" + path);
+
+            // 1. 定义文件存储的根路径
+            var filePath = _EnvConfig.GetUploadPath(path);
+
+            // 2. 校验文件是否存在
             if (!System.IO.File.Exists(filePath))
             {
                 return NotFound("文件不存在，请检查文件名是否正确");
             }
 
+            // 3. 获取文件的MIME类型
+            var contentType = HttpContentType.APPLICATION_OCTET_STREAM;
+
             var fileInfo = new FileInfo(filePath);
             var fileLength = fileInfo.Length;
             var rangeHeader = Request.Headers.Range.ToString();
-
-            var contentType = HttpContentType.APPLICATION_OCTET_STREAM;
 
             // 处理断点续传
             if (!string.IsNullOrEmpty(rangeHeader))

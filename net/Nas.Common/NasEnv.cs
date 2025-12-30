@@ -56,6 +56,11 @@
         public const string SyncUrl = "/NasSync/Sync";
 
         /// <summary>
+        /// 驱动检测路径
+        /// </summary>
+        public const string DriveUrl = "/NasSync/Drive";
+
+        /// <summary>
         /// 文件上传路径
         /// </summary>
         public const string FileUploadUrl = "/Upload/File";
@@ -75,7 +80,7 @@
         /// <summary>
         /// 文件下载路径
         /// </summary>
-        public const string FileDownloadUrl = "/NasSync/Download";
+        public const string FileDownloadUrl = "/Download/file";
 
         /// <summary>
         /// 默认目录ID

@@ -56,6 +56,35 @@ namespace Com.Scm.Nas.Sync
         }
 
         /// <summary>
+        /// 更新
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public async Task<long> PostDriveAsync(NasResDriveDto model, [FromHeader] string appToken)
+        {
+            var token = GetToken(appToken);
+
+            var dao = await _SqlClient.Queryable<NasResDriveDao>()
+                .Where(a => a.terminal_id == token.terminal_id && a.path == model.path)
+                .FirstAsync();
+
+            if (dao == null)
+            {
+                dao = model.Adapt<NasResDriveDao>();
+                dao.PrepareCreate(ScmEnv.DEFAULT_ID);
+                await _SqlClient.Insertable(dao).ExecuteCommandAsync();
+            }
+            else
+            {
+                dao.row_status = Enums.ScmRowStatusEnum.Enabled;
+                dao.PrepareUpdate(ScmEnv.DEFAULT_ID);
+                await _SqlClient.Updateable(dao).ExecuteCommandAsync();
+            }
+
+            return dao.id;
+        }
+
+        /// <summary>
         /// 检查指定HASH是否存在
         /// </summary>
         /// <param name="hash"></param>

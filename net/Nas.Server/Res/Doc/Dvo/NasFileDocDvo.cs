@@ -1,6 +1,6 @@
 using Com.Scm.Dvo;
 
-namespace Com.Scm.Nas.Res
+namespace Com.Scm.Nas.Res.Doc.Dvo
 {
     /// <summary>
     /// 文档

@@ -1,4 +1,3 @@
-using Com.Scm.Nas.File;
 using SqlSugar;
 
 namespace Com.Scm.Nas.Res

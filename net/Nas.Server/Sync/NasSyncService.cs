@@ -1,6 +1,6 @@
 ﻿using Com.Scm.Api;
 using Com.Scm.Config;
-using Com.Scm.Nas.File;
+using Com.Scm.Nas.Cfg;
 using Com.Scm.Nas.Log;
 using Com.Scm.Nas.Res;
 using Com.Scm.Nas.Sync.Dvo;
@@ -60,7 +60,7 @@ namespace Com.Scm.Nas.Sync
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public async Task<long> PostDriveAsync(NasResDriveDto model, [FromHeader] string appToken)
+        public async Task<long> PostDriveAsync(NasCfgDriveDto model, [FromHeader] string appToken)
         {
             var token = GetToken(appToken);
 

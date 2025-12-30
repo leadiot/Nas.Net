@@ -4,7 +4,7 @@ using Com.Scm.Utils;
 using SqlSugar;
 using System.ComponentModel.DataAnnotations;
 
-namespace Com.Scm.Nas.File
+namespace Com.Scm.Nas.Res
 {
     /// <summary>
     /// 文件信息

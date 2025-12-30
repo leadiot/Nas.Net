@@ -1,12 +1,14 @@
-using Com.Scm.Dto;
+using Com.Scm.Dao.User;
+using SqlSugar;
 using System.ComponentModel.DataAnnotations;
 
-namespace Com.Scm.Nas.Res
+namespace Com.Scm.Nas.Cfg
 {
     /// <summary>
     /// 驱动
     /// </summary>
-    public class NasResDriveDto : ScmDataDto
+    [SugarTable("nas_cfg_drive")]
+    public class NasResDriveDao : ScmUserDataDao
     {
         /// <summary>
         /// 终端ID

@@ -1,7 +1,7 @@
 ﻿using Com.Scm.Dto;
 using System.ComponentModel.DataAnnotations;
 
-namespace Com.Scm.Nas.File
+namespace Com.Scm.Nas.Res
 {
     public class NasResFileDto : ScmDataDto
     {

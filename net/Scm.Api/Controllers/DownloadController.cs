@@ -1,5 +1,6 @@
 ﻿using Com.Scm.Config;
 using Com.Scm.Controllers;
+using Com.Scm.Filters;
 using Com.Scm.Http;
 using Com.Scm.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -25,6 +26,7 @@ namespace Com.Scm.Api.Controllers
         /// <returns>文件流</returns>
         [HttpGet("File")]
         [HttpGet("Small")]
+        [NoJsonResult]
         public IActionResult DownloadSmallFile(string path)
         {
             LogUtils.Debug("小文件下载：" + path);
@@ -46,6 +48,7 @@ namespace Com.Scm.Api.Controllers
         }
 
         [HttpGet("Large")]
+        [NoJsonResult]
         public async Task<IActionResult> DownloadLargeFile(string path)
         {
             LogUtils.Debug("大文件下载：" + path);

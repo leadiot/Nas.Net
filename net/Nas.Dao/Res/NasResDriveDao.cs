@@ -24,9 +24,15 @@ namespace Com.Scm.Nas.Res
         public string name { get; set; }
 
         /// <summary>
-        /// 路径
+        /// 本地路径
         /// </summary>
-        [StringLength(256)]
-        public string path { get; set; }
+        [StringLength(2048)]
+        public string native_path { get; set; }
+
+        /// <summary>
+        /// 远端路径
+        /// </summary>
+        [StringLength(2048)]
+        public string remote_path { get; set; }
     }
 }

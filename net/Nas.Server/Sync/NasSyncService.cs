@@ -65,7 +65,7 @@ namespace Com.Scm.Nas.Sync
             var token = GetToken(appToken);
 
             var dao = await _SqlClient.Queryable<NasResDriveDao>()
-                .Where(a => a.terminal_id == token.terminal_id && a.path == model.path)
+                .Where(a => a.terminal_id == token.terminal_id && a.native_path == model.native_path)
                 .FirstAsync();
 
             if (dao == null)

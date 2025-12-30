@@ -37,7 +37,7 @@ namespace Com.Scm.Api.Controllers
             // 2. 校验文件是否存在
             if (!System.IO.File.Exists(filePath))
             {
-                return NotFound("文件不存在，请检查文件名是否正确");
+                return Empty;
             }
 
             // 3. 获取文件的MIME类型

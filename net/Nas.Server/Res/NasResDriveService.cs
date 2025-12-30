@@ -136,7 +136,7 @@ namespace Com.Scm.Nas.Res
             {
                 throw new BusinessException("已存在相同名称的目录！");
             }
-            dao = await _thisRepository.GetFirstAsync(a => a.path == model.path);
+            dao = await _thisRepository.GetFirstAsync(a => a.native_path == model.native_path);
             if (dao != null)
             {
                 throw new BusinessException("已存在相同路径的目录！");
@@ -158,7 +158,7 @@ namespace Com.Scm.Nas.Res
             {
                 throw new BusinessException("已存在相同名称的目录！");
             }
-            dao = await _thisRepository.GetFirstAsync(a => a.path == model.path && a.id != model.id);
+            dao = await _thisRepository.GetFirstAsync(a => a.native_path == model.native_path && a.id != model.id);
             if (dao != null)
             {
                 throw new BusinessException("已存在相同路径的目录！");

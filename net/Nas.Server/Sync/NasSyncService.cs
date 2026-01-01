@@ -288,6 +288,12 @@ namespace Com.Scm.Nas.Sync
                 return result;
             }
 
+            if (dto.opt == NasOptEnums.Change)
+            {
+                await ChangeFile(terminalToken, dto, result);
+                return result;
+            }
+
             LogUtils.Debug("不支持的操作：" + dto.opt);
             result.SetFailure("不支持的操作：" + dto.opt);
             return result;
@@ -829,6 +835,108 @@ namespace Com.Scm.Nas.Sync
             AddLogFileByDto(token, dto);
 
             result.SetSuccess();
+            return true;
+        }
+        #endregion
+
+        #region 更新文件
+        /// <summary>
+        /// 更新文件
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private async Task<bool> ChangeFile(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
+        {
+            LogUtils.Debug("更新文件：" + dto.path);
+
+            if (dto.type == NasTypeEnums.Dir)
+            {
+                return await ChangeDir(token, dto, result);
+            }
+
+            if (dto.type == NasTypeEnums.Doc)
+            {
+                return await ChangeDoc(token, dto, result);
+            }
+
+            result.SetFailure("未知的文件类型：" + dto.type);
+            return false;
+        }
+
+        /// <summary>
+        /// 更新文档
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private async Task<bool> ChangeDoc(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
+        {
+            LogUtils.Debug("更新文档：" + dto.path);
+
+            if (string.IsNullOrEmpty(dto.src))
+            {
+                return false;
+            }
+
+            var tmpFile = _EnvConfig.GetTempPath(dto.src);
+            if (!FileUtils.ExistsDoc(tmpFile))
+            {
+                result.SetFailure($"上传文档不存在！");
+                return false;
+            }
+
+            var dstFile = GetPhysicalPath(dto.path);
+            if (!FileUtils.Moveto(tmpFile, dstFile))
+            {
+                SyncResult.Failure("上传文档移动异常！");
+                return false;
+            }
+
+            var docDao = GetDocDaoByPath(dto.path);
+            if (docDao == null)
+            {
+                var dirId = GetParentIdByPath(dto.path);
+                AddCreateFile(token, dto, dirId);
+
+                AddLogFileByDto(token, dto);
+            }
+            else
+            {
+                docDao.hash = dto.hash;
+                docDao.size = dto.size;
+                UpdateResFileDao(token, docDao);
+
+                AddLogFileByDto(token, dto);
+            }
+
+            result.SetSuccess();
+            return true;
+        }
+
+        /// <summary>
+        /// 更新目录
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private async Task<bool> ChangeDir(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
+        {
+            LogUtils.Debug("更新目录：" + dto.path);
+
+            var tmpFile = GetPhysicalPath(dto.path);
+            if (!Directory.Exists(tmpFile))
+            {
+                Directory.CreateDirectory(tmpFile);
+            }
+
+            var dirId = CreateDirDao(GetParentDir(dto.path), token.user_id);
+
+            var docDao = AddCreateFile(token, dto, dirId);
+
+            AddLogFileByDto(token, dto);
+
+            result.SetSuccess(docDao.id);
             return true;
         }
         #endregion

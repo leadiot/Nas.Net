@@ -80,9 +80,10 @@ namespace Com.Scm.Nas.Sync
         public async Task<long> PostDriveAsync(NasCfgDriveDto model, [FromHeader] string appToken)
         {
             var token = GetToken(appToken);
+            LogUtils.Debug("SaveDrive:" + token.ToJsonString());
 
             var dao = await _SqlClient.Queryable<NasCfgDriveDao>()
-                .Where(a => a.terminal_id == token.terminal_id && a.path == model.path)
+                .Where(a => a.terminal_id == token.terminal_id && a.folder_id == model.folder_id)
                 .FirstAsync();
 
             if (dao == null)

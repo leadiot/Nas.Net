@@ -104,6 +104,7 @@ namespace Com.Scm.Nas.Sync
             if (dao == null)
             {
                 dao = model.Adapt<NasCfgDriveDao>();
+                dao.terminal_id = token.terminal_id;
                 dao.PrepareCreate(ScmEnv.DEFAULT_ID);
                 await _SqlClient.Insertable(dao).ExecuteCommandAsync();
             }

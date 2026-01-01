@@ -84,18 +84,7 @@ namespace Com.Scm.Nas.Sync
 
             if (!ScmUtils.IsValidId(model.folder_id))
             {
-                CreateDirDao(model.path, ScmEnv.DEFAULT_ID);
-                var dirDao = new NasResFileDao();
-                dirDao.terminal_id = token.terminal_id;
-                dirDao.dir_id = NasEnv.DEF_DIR_ID;
-                dirDao.type = NasTypeEnums.Dir;
-                dirDao.name = model.name;
-                dirDao.path = model.path;
-                dirDao.hash = "";
-                dirDao.size = 0;
-                dirDao.PrepareCreate(ScmEnv.DEFAULT_ID);
-                await _SqlClient.Insertable(dirDao).ExecuteCommandAsync();
-                model.folder_id = dirDao.id;
+                model.folder_id = CreateDirDao(model.path, ScmEnv.DEFAULT_ID);
             }
 
             var dao = await _SqlClient.Queryable<NasCfgDriveDao>()
@@ -129,7 +118,7 @@ namespace Com.Scm.Nas.Sync
         [HttpGet("{hash}")]
         public async Task<bool> GetQueryAsync(string hash)
         {
-            var exists = await _SqlClient.Queryable<NasResFileDocDao>()
+            var exists = await _SqlClient.Queryable<NasResFileDao>()
                 .Where(a => a.hash == hash)
                 .AnyAsync();
 
@@ -348,8 +337,8 @@ namespace Com.Scm.Nas.Sync
             var dstFile = GetPhysicalPath(dto.path);
             FileUtils.DeleteDoc(dstFile);
 
-            var docDao = await _SqlClient.Queryable<NasResFileDocDao>()
-                .Where(a => a.user_id == token.user_id && a.path == dto.path && a.hash == dto.hash)
+            var docDao = await _SqlClient.Queryable<NasResFileDao>()
+                .Where(a => a.type == NasTypeEnums.Doc && a.path == dto.path && a.hash == dto.hash)
                 .FirstAsync();
             if (docDao == null)
             {
@@ -375,8 +364,8 @@ namespace Com.Scm.Nas.Sync
             var dstFile = GetPhysicalPath(dto.path);
             FileUtils.DeleteDir(dstFile);
 
-            var dirDao = await _SqlClient.Queryable<NasResFileDirDao>()
-                .Where(a => a.terminal_id == token.id && a.path == dto.path)
+            var dirDao = await _SqlClient.Queryable<NasResFileDao>()
+                .Where(a => a.type == NasTypeEnums.Dir && a.path == dto.path)
                 .FirstAsync();
             if (dirDao != null)
             {
@@ -391,26 +380,22 @@ namespace Com.Scm.Nas.Sync
             return true;
         }
 
-        private async Task DeleteDocDao(NasResFileDocDao dao)
+        private async Task DeleteDocDao(NasResFileDao dao)
         {
             await _SqlClient.Deleteable(dao).ExecuteCommandAsync();
         }
 
-        private async Task DeleteDirDao(NasResFileDirDao dao)
+        private async Task DeleteDirDao(NasResFileDao dao)
         {
-            await _SqlClient.Deleteable<NasResFileDocDao>()
-                .Where(a => a.dir_id == dao.dir_id)
-                .ExecuteCommandAsync();
-
-            var dirList = await _SqlClient.Queryable<NasResFileDirDao>()
-                .Where(a => a.dir_id == dao.dir_id)
+            var dirList = await _SqlClient.Queryable<NasResFileDao>()
+                .Where(a => a.type == NasTypeEnums.Dir && a.dir_id == dao.dir_id)
                 .ToListAsync();
             foreach (var dir in dirList)
             {
                 await DeleteDirDao(dir);
             }
 
-            await _SqlClient.Deleteable<NasResFileDirDao>()
+            await _SqlClient.Deleteable<NasResFileDao>()
                 .Where(a => a.dir_id == dao.dir_id)
                 .ExecuteCommandAsync();
         }

@@ -20,14 +20,14 @@ namespace Com.Scm.Nas.Res
         /// <summary>
         /// 终端ID
         /// </summary>
-        [Required]
-        public long terminal_id { get; set; }
+        //[Required]
+        //public long terminal_id { get; set; }
 
         /// <summary>
         /// 驱动ID
         /// </summary>
-        [Required]
-        public long drive_id { get; set; }
+        //[Required]
+        //public long drive_id { get; set; }
 
         /// <summary>
         /// 目录ID

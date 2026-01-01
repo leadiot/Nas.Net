@@ -77,10 +77,25 @@ namespace Com.Scm.Nas.Sync
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public async Task<long> PostDriveAsync(NasCfgDriveDto model, [FromHeader] string appToken)
+        public async Task<NasCfgDriveDto> PostDriveAsync(NasCfgDriveDto model, [FromHeader] string appToken)
         {
             var token = GetToken(appToken);
             LogUtils.Debug("SaveDrive:" + token.ToJsonString());
+
+            if (!ScmUtils.IsValidId(model.folder_id))
+            {
+                var dirDao = new NasResFileDao();
+                dirDao.terminal_id = token.terminal_id;
+                dirDao.dir_id = NasEnv.DEF_DIR_ID;
+                dirDao.type = NasTypeEnums.Dir;
+                dirDao.name = model.name;
+                dirDao.path = model.path;
+                dirDao.hash = "";
+                dirDao.size = 0;
+                dirDao.PrepareCreate(ScmEnv.DEFAULT_ID);
+                await _SqlClient.Insertable(dirDao).ExecuteCommandAsync();
+                model.folder_id = dirDao.id;
+            }
 
             var dao = await _SqlClient.Queryable<NasCfgDriveDao>()
                 .Where(a => a.terminal_id == token.terminal_id && a.folder_id == model.folder_id)
@@ -99,7 +114,9 @@ namespace Com.Scm.Nas.Sync
                 await _SqlClient.Updateable(dao).ExecuteCommandAsync();
             }
 
-            return dao.id;
+            model.id = dao.id;
+
+            return model;
         }
 
         /// <summary>

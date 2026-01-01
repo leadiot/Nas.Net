@@ -1,5 +1,6 @@
 ﻿using Com.Scm.Config;
 using Com.Scm.Controllers;
+using Com.Scm.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,6 +26,7 @@ namespace Com.Scm.Api.Controllers
             var file = request.file;
             if (file == null)
             {
+                LogUtils.Debug("上传文件为空！");
                 response.SetFailure("上传文件为空！");
                 return response;
             }
@@ -44,6 +46,7 @@ namespace Com.Scm.Api.Controllers
                 await file.CopyToAsync(stream);
             }
 
+            LogUtils.Debug("上传文件成功：" + name);
             response.SetSuccess($"文件上传成功！");
             return response;
         }

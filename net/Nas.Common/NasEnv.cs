@@ -56,9 +56,13 @@
         public const string SyncUrl = "/NasSync/Sync";
 
         /// <summary>
-        /// 驱动检测路径
+        /// 获取驱动列表
         /// </summary>
-        public const string DriveUrl = "/NasSync/Drive";
+        public const string ListDriveUrl = "/NasSync/Drive";
+        /// <summary>
+        /// 更新驱动路径
+        /// </summary>
+        public const string SaveDriveUrl = "/NasSync/Drive";
 
         /// <summary>
         /// 文件上传路径

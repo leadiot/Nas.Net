@@ -56,7 +56,24 @@ namespace Com.Scm.Nas.Sync
         }
 
         /// <summary>
-        /// 更新
+        /// 获取驱动列表
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ScmApiListResponse<NasCfgDriveDto>> GetDriveAsync()
+        {
+            var list = await _SqlClient.Queryable<NasCfgDriveDao>()
+                .Where(a => a.row_status == Enums.ScmRowStatusEnum.Enabled)
+                .Select<NasCfgDriveDto>()
+                .ToListAsync();
+
+            var response = new ScmApiListResponse<NasCfgDriveDto>();
+            response.SetSuccess(list);
+
+            return response;
+        }
+
+        /// <summary>
+        /// 更新驱动
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -64,13 +81,13 @@ namespace Com.Scm.Nas.Sync
         {
             var token = GetToken(appToken);
 
-            var dao = await _SqlClient.Queryable<NasResDriveDao>()
-                .Where(a => a.terminal_id == token.terminal_id && a.native_path == model.native_path)
+            var dao = await _SqlClient.Queryable<NasCfgDriveDao>()
+                .Where(a => a.terminal_id == token.terminal_id && a.path == model.path)
                 .FirstAsync();
 
             if (dao == null)
             {
-                dao = model.Adapt<NasResDriveDao>();
+                dao = model.Adapt<NasCfgDriveDao>();
                 dao.PrepareCreate(ScmEnv.DEFAULT_ID);
                 await _SqlClient.Insertable(dao).ExecuteCommandAsync();
             }
@@ -92,7 +109,7 @@ namespace Com.Scm.Nas.Sync
         [HttpGet("{hash}")]
         public async Task<bool> GetQueryAsync(string hash)
         {
-            var exists = await _SqlClient.Queryable<NasFileDocDao>()
+            var exists = await _SqlClient.Queryable<NasResFileDocDao>()
                 .Where(a => a.hash == hash)
                 .AnyAsync();
 
@@ -270,7 +287,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public async Task<bool> DeleteFile(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
+        private async Task<bool> DeleteFile(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
         {
             LogUtils.Debug("删除文件：" + dto.path);
 
@@ -307,7 +324,7 @@ namespace Com.Scm.Nas.Sync
             var dstFile = GetPhysicalPath(dto.path);
             FileUtils.DeleteDoc(dstFile);
 
-            var docDao = await _SqlClient.Queryable<NasFileDocDao>()
+            var docDao = await _SqlClient.Queryable<NasResFileDocDao>()
                 .Where(a => a.user_id == token.user_id && a.path == dto.path && a.hash == dto.hash)
                 .FirstAsync();
             if (docDao == null)
@@ -334,7 +351,7 @@ namespace Com.Scm.Nas.Sync
             var dstFile = GetPhysicalPath(dto.path);
             FileUtils.DeleteDir(dstFile);
 
-            var dirDao = await _SqlClient.Queryable<NasFileDirDao>()
+            var dirDao = await _SqlClient.Queryable<NasResFileDirDao>()
                 .Where(a => a.terminal_id == token.id && a.path == dto.path)
                 .FirstAsync();
             if (dirDao != null)
@@ -350,18 +367,18 @@ namespace Com.Scm.Nas.Sync
             return true;
         }
 
-        private async Task DeleteDocDao(NasFileDocDao dao)
+        private async Task DeleteDocDao(NasResFileDocDao dao)
         {
             await _SqlClient.Deleteable(dao).ExecuteCommandAsync();
         }
 
-        private async Task DeleteDirDao(NasFileDirDao dao)
+        private async Task DeleteDirDao(NasResFileDirDao dao)
         {
-            await _SqlClient.Deleteable<NasFileDocDao>()
+            await _SqlClient.Deleteable<NasResFileDocDao>()
                 .Where(a => a.dir_id == dao.dir_id)
                 .ExecuteCommandAsync();
 
-            var dirList = await _SqlClient.Queryable<NasFileDirDao>()
+            var dirList = await _SqlClient.Queryable<NasResFileDirDao>()
                 .Where(a => a.dir_id == dao.dir_id)
                 .ToListAsync();
             foreach (var dir in dirList)
@@ -369,7 +386,7 @@ namespace Com.Scm.Nas.Sync
                 await DeleteDirDao(dir);
             }
 
-            await _SqlClient.Deleteable<NasFileDirDao>()
+            await _SqlClient.Deleteable<NasResFileDirDao>()
                 .Where(a => a.dir_id == dao.dir_id)
                 .ExecuteCommandAsync();
         }
@@ -382,7 +399,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public async Task<bool> CreateFile(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
+        private async Task<bool> CreateFile(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
         {
             LogUtils.Debug("创建文件：" + dto.path);
 
@@ -488,7 +505,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="dto"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public async Task<bool> MoveFile(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
+        private async Task<bool> MoveFile(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
         {
             LogUtils.Debug("移动文件：" + dto.path);
 

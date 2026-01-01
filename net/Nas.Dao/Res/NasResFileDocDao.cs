@@ -3,14 +3,14 @@ using SqlSugar;
 namespace Com.Scm.Nas.Res
 {
     /// <summary>
-    /// 目录
+    /// 文档
     /// </summary>
     [SugarTable("nas_res_file")]
-    public class NasFileDirDao : NasResFileDao
+    public class NasResFileDocDao : NasResFileDao
     {
-        public NasFileDirDao()
+        public NasResFileDocDao()
         {
-            type = NasTypeEnums.Dir;
+            type = NasTypeEnums.Doc;
         }
     }
 }

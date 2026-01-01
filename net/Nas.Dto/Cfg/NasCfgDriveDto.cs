@@ -22,15 +22,9 @@ namespace Com.Scm.Nas.Cfg
         public string name { get; set; }
 
         /// <summary>
-        /// 本地路径
-        /// </summary>
-        [StringLength(2048)]
-        public string native_path { get; set; }
-
-        /// <summary>
         /// 远端路径
         /// </summary>
         [StringLength(2048)]
-        public string remote_path { get; set; }
+        public string path { get; set; }
     }
 }

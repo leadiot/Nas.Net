@@ -15,13 +15,13 @@ namespace Com.Scm.Nas.Res.Doc
     [ApiExplorerSettings(GroupName = "Nas")]
     public class NasFileDocService : ApiService
     {
-        private readonly SugarRepository<NasFileDocDao> _thisRepository;
+        private readonly SugarRepository<NasResFileDocDao> _thisRepository;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="thisRepository"></param>
-        public NasFileDocService(SugarRepository<NasFileDocDao> thisRepository, IUserHolder userHolder)
+        public NasFileDocService(SugarRepository<NasResFileDocDao> thisRepository, IUserHolder userHolder)
         {
             _thisRepository = thisRepository;
             _UserService = userHolder;
@@ -138,7 +138,7 @@ namespace Com.Scm.Nas.Res.Doc
                 throw new BusinessException("已存在相同名称的文档！");
             }
 
-            dao = model.Adapt<NasFileDocDao>();
+            dao = model.Adapt<NasResFileDocDao>();
             return await _thisRepository.InsertAsync(dao);
         }
 

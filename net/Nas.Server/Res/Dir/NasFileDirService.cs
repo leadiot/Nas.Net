@@ -15,13 +15,13 @@ namespace Com.Scm.Nas.Res.Dir
     [ApiExplorerSettings(GroupName = "Nas")]
     public class NasFileDirService : ApiService
     {
-        private readonly SugarRepository<NasFileDirDao> _thisRepository;
+        private readonly SugarRepository<NasResFileDirDao> _thisRepository;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="thisRepository"></param>
-        public NasFileDirService(SugarRepository<NasFileDirDao> thisRepository, IUserHolder userHolder)
+        public NasFileDirService(SugarRepository<NasResFileDirDao> thisRepository, IUserHolder userHolder)
         {
             _thisRepository = thisRepository;
             _UserService = userHolder;
@@ -138,7 +138,7 @@ namespace Com.Scm.Nas.Res.Dir
                 throw new BusinessException("已存在相同名称的目录！");
             }
 
-            dao = model.Adapt<NasFileDirDao>();
+            dao = model.Adapt<NasResFileDirDao>();
             return await _thisRepository.InsertAsync(dao);
         }
 

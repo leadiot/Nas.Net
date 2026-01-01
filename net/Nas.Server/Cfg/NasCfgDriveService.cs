@@ -15,13 +15,13 @@ namespace Com.Scm.Nas.Cfg
     [ApiExplorerSettings(GroupName = "Nas")]
     public class NasCfgDriveService : ApiService
     {
-        private readonly SugarRepository<NasResDriveDao> _thisRepository;
+        private readonly SugarRepository<NasCfgDriveDao> _thisRepository;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="thisRepository"></param>
-        public NasCfgDriveService(SugarRepository<NasResDriveDao> thisRepository, IUserHolder userHolder)
+        public NasCfgDriveService(SugarRepository<NasCfgDriveDao> thisRepository, IUserHolder userHolder)
         {
             _thisRepository = thisRepository;
             _UserService = userHolder;
@@ -137,13 +137,13 @@ namespace Com.Scm.Nas.Cfg
             {
                 throw new BusinessException("已存在相同名称的目录！");
             }
-            dao = await _thisRepository.GetFirstAsync(a => a.native_path == model.native_path);
+            dao = await _thisRepository.GetFirstAsync(a => a.path == model.path);
             if (dao != null)
             {
                 throw new BusinessException("已存在相同路径的目录！");
             }
 
-            dao = model.Adapt<NasResDriveDao>();
+            dao = model.Adapt<NasCfgDriveDao>();
             return await _thisRepository.InsertAsync(dao);
         }
 
@@ -159,7 +159,7 @@ namespace Com.Scm.Nas.Cfg
             {
                 throw new BusinessException("已存在相同名称的目录！");
             }
-            dao = await _thisRepository.GetFirstAsync(a => a.native_path == model.native_path && a.id != model.id);
+            dao = await _thisRepository.GetFirstAsync(a => a.path == model.path && a.id != model.id);
             if (dao != null)
             {
                 throw new BusinessException("已存在相同路径的目录！");

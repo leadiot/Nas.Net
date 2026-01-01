@@ -412,14 +412,14 @@ namespace Com.Scm.Nas.Sync
         {
             LogUtils.Debug("创建文件：" + dto.path);
 
-            if (dto.type == NasTypeEnums.Doc)
-            {
-                return await CreateDoc(token, dto, result);
-            }
-
             if (dto.type == NasTypeEnums.Dir)
             {
                 return await CreateDir(token, dto, result);
+            }
+
+            if (dto.type == NasTypeEnums.Doc)
+            {
+                return await CreateDoc(token, dto, result);
             }
 
             result.SetFailure("未知的文件类型：" + dto.type);
@@ -523,18 +523,47 @@ namespace Com.Scm.Nas.Sync
                 return false;
             }
 
-            if (dto.type == NasTypeEnums.Doc)
-            {
-                return await MoveDoc(token, dto, result);
-            }
-
             if (dto.type == NasTypeEnums.Dir)
             {
                 return await MoveDir(token, dto, result);
             }
 
+            if (dto.type == NasTypeEnums.Doc)
+            {
+                return await MoveDoc(token, dto, result);
+            }
+
             result.SetFailure("未知的文件类型：" + dto.type);
             return false;
+        }
+
+        /// <summary>
+        /// 移动目录
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private async Task<bool> MoveDir(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
+        {
+            LogUtils.Debug("移动目录：" + dto.path);
+
+            var srcFile = GetPhysicalPath(dto.src);
+            if (!FileUtils.ExistsDoc(srcFile))
+            {
+                result.SetFailure($"来源目录 {dto.src} 不存在！");
+                return false;
+            }
+
+            var dstFile = GetPhysicalPath(dto.path);
+            FileUtils.Moveto(srcFile, dstFile);
+
+            var dirId = CreateDirDao(dto.path, token.user_id);
+
+            var dao = dto.Adapt<NasLogFileDao>();
+            await _SqlClient.Insertable(dao).ExecuteCommandAsync();
+
+            result.SetSuccess(dirId);
+            return true;
         }
 
         /// <summary>
@@ -566,35 +595,6 @@ namespace Com.Scm.Nas.Sync
             result.SetSuccess(docDao.id);
             return true;
         }
-
-        /// <summary>
-        /// 移动目录
-        /// </summary>
-        /// <param name="dto"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        private async Task<bool> MoveDir(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
-        {
-            LogUtils.Debug("移动目录：" + dto.path);
-
-            var srcFile = GetPhysicalPath(dto.src);
-            if (!FileUtils.ExistsDoc(srcFile))
-            {
-                result.SetFailure($"来源目录 {dto.src} 不存在！");
-                return false;
-            }
-
-            var dstFile = GetPhysicalPath(dto.path);
-            FileUtils.Moveto(srcFile, dstFile);
-
-            var dirId = CreateDirDao(dto.path, token.user_id);
-
-            var dao = dto.Adapt<NasLogFileDao>();
-            await _SqlClient.Insertable(dao).ExecuteCommandAsync();
-
-            result.SetSuccess(dirId);
-            return true;
-        }
         #endregion
 
         #region 复件文件
@@ -613,48 +613,18 @@ namespace Com.Scm.Nas.Sync
                 return false;
             }
 
-            if (dto.type == NasTypeEnums.Doc)
-            {
-                return await CopyDoc(token, dto, result);
-            }
-
             if (dto.type == NasTypeEnums.Dir)
             {
                 return await CopyDir(token, dto, result);
             }
 
-            result.SetFailure("未知的文件类型：" + dto.type);
-            return false;
-        }
-
-        /// <summary>
-        /// 移动文档
-        /// </summary>
-        /// <param name="dto"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        private async Task<bool> CopyDoc(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
-        {
-            LogUtils.Debug("复制文档：" + dto.path);
-
-            var srcFile = GetPhysicalPath(dto.src);
-            if (!FileUtils.ExistsDoc(srcFile))
+            if (dto.type == NasTypeEnums.Doc)
             {
-                LogUtils.Debug($"来源文档 {dto.src} 不存在！");
-                result.SetFailure($"来源文档 {dto.src} 不存在！");
-                return false;
+                return await CopyDoc(token, dto, result);
             }
 
-            var dstFile = GetPhysicalPath(dto.path);
-            FileUtils.Copyto(srcFile, dstFile);
-
-            var dirId = CreateDirDao(GetParentDir(dto.path), token.user_id);
-            var docDao = AddCreateFile(token, dto, dirId);
-
-            AddLogFileByDto(token, dto);
-
-            result.SetSuccess(docDao.id);
-            return true;
+            result.SetFailure("未知的文件类型：" + dto.type);
+            return false;
         }
 
         /// <summary>
@@ -683,6 +653,49 @@ namespace Com.Scm.Nas.Sync
             AddLogFileByDto(token, dto);
 
             result.SetSuccess(dirId);
+            return true;
+        }
+
+        /// <summary>
+        /// 移动文档
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private async Task<bool> CopyDoc(ScmTerminalInfo token, NasLogFileDto dto, SyncResult result)
+        {
+            LogUtils.Debug("复制文档：" + dto.path);
+
+            var srcFile = GetPhysicalPath(dto.src);
+            if (!FileUtils.ExistsDoc(srcFile))
+            {
+                LogUtils.Debug($"来源文档 {dto.src} 不存在！");
+                result.SetFailure($"来源文档 {dto.src} 不存在！");
+                return false;
+            }
+
+            var dstFile = GetPhysicalPath(dto.path);
+            FileUtils.Copyto(srcFile, dstFile);
+
+            var docDao = GetDocDaoByPath(dto.path);
+            if (docDao != null)
+            {
+                docDao.name = dto.name;
+                docDao.path = dto.path;
+                docDao.hash = dto.hash;
+                docDao.size = dto.size;
+                UpdateResFileDao(token, docDao);
+            }
+            else
+            {
+                dto.dir_id = GetParentIdByPath(dto.path);
+                // 追加文档记录
+                AddResFileByDto(token, dto);
+            }
+
+            AddLogFileByDto(token, dto);
+
+            result.SetSuccess(docDao.id);
             return true;
         }
         #endregion

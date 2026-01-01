@@ -346,7 +346,7 @@ namespace Com.Scm.Nas.Sync
             var docDao = await _SqlClient.Queryable<NasResFileDao>()
                 .Where(a => a.type == NasTypeEnums.Doc && a.path == dto.path && a.hash == dto.hash)
                 .FirstAsync();
-            if (docDao == null)
+            if (docDao != null)
             {
                 await DeleteDocDao(docDao);
             }
@@ -355,6 +355,11 @@ namespace Com.Scm.Nas.Sync
 
             result.SetSuccess();
             return true;
+        }
+
+        private async Task DeleteDocDao(NasResFileDao dao)
+        {
+            await _SqlClient.Deleteable(dao).ExecuteCommandAsync();
         }
 
         /// <summary>
@@ -384,11 +389,6 @@ namespace Com.Scm.Nas.Sync
 
             result.SetSuccess();
             return true;
-        }
-
-        private async Task DeleteDocDao(NasResFileDao dao)
-        {
-            await _SqlClient.Deleteable(dao).ExecuteCommandAsync();
         }
 
         private async Task DeleteDirDao(NasResFileDao dao)

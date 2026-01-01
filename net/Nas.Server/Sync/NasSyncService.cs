@@ -394,7 +394,7 @@ namespace Com.Scm.Nas.Sync
         private async Task DeleteDirDao(NasResFileDao dao)
         {
             var dirList = await _SqlClient.Queryable<NasResFileDao>()
-                .Where(a => a.type == NasTypeEnums.Dir && a.dir_id == dao.dir_id)
+                .Where(a => a.type == NasTypeEnums.Dir && a.dir_id == dao.id)
                 .ToListAsync();
             foreach (var dir in dirList)
             {

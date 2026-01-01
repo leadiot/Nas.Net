@@ -140,12 +140,12 @@ namespace Com.Scm.Nas.Sync
             //    return null;
             //}
             var driveId = request.drive_id;
-            var driveDao = GetDriveDao(driveId);
+            //var driveDao = GetDriveDao(driveId);
 
             return await _SqlClient.Queryable<NasLogFileDao>()
                 .Where(a => a.drive_id != driveId &&
                     a.row_status == Enums.ScmRowStatusEnum.Enabled &&
-                    a.path.StartsWith(driveDao.path) &&
+                    //a.path.StartsWith(driveDao.path) &&
                     a.id > request.id)
                 .OrderBy(a => a.id, OrderByType.Asc)
                 .Select<NasLogFileDto>()

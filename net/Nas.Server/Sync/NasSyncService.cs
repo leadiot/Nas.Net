@@ -131,9 +131,13 @@ namespace Com.Scm.Nas.Sync
             //    return null;
             //}
             var driveId = request.drive_id;
+            var driveDao = GetDriveDao(driveId);
 
             return await _SqlClient.Queryable<NasLogFileDao>()
-                .Where(a => a.drive_id != driveId && a.row_status == Enums.ScmRowStatusEnum.Enabled && a.id > request.id)
+                .Where(a => a.drive_id != driveId &&
+                    a.row_status == Enums.ScmRowStatusEnum.Enabled &&
+                    a.path.StartsWith(driveDao.path) &&
+                    a.id > request.id)
                 .OrderBy(a => a.id, OrderByType.Asc)
                 .Select<NasLogFileDto>()
                 .ToPageAsync(request.page, request.limit);
@@ -926,6 +930,11 @@ namespace Com.Scm.Nas.Sync
             }
 
             return nasToken;
+        }
+
+        private NasCfgDriveDao GetDriveDao(long driveId)
+        {
+            return _SqlClient.Queryable<NasCfgDriveDao>().First(a => a.id == driveId);
         }
         #endregion
     }

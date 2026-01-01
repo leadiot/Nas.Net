@@ -17,6 +17,12 @@ namespace Com.Scm.Nas.Cfg
         public long terminal_id { get; set; }
 
         /// <summary>
+        /// 目录ID
+        /// </summary>
+        [Required]
+        public long folder_id { get; set; }
+
+        /// <summary>
         /// 名称
         /// </summary>
         [Required]

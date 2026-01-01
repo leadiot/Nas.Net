@@ -15,16 +15,16 @@ namespace Com.Scm.Nas.Cfg.Dvo
         /// <summary>
         /// 
         /// </summary>
+        public long folder_id { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public string name { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         public string path { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public long time { get; set; }
     }
 }

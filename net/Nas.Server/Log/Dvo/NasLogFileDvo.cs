@@ -38,9 +38,14 @@ namespace Com.Scm.Nas.Log
         public NasDirEnums dir { get; set; }
 
         /// <summary>
-        /// 同步文件
+        /// 文件名称
         /// </summary>
-        public string file { get; set; }
+        public string name { get; set; }
+
+        /// <summary>
+        /// 文件路径
+        /// </summary>
+        public string path { get; set; }
 
         /// <summary>
         /// 文件摘要

@@ -24,7 +24,7 @@ namespace Com.Scm.Nas.Cfg
         public NasCfgDriveService(SugarRepository<NasCfgDriveDao> thisRepository, IUserHolder userHolder)
         {
             _thisRepository = thisRepository;
-            _UserService = userHolder;
+            _UserHolder = userHolder;
         }
 
         /// <summary>

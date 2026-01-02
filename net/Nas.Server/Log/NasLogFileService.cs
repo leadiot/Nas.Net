@@ -21,7 +21,7 @@ namespace Com.Scm.Nas.Log
         public NasLogFileService(SugarRepository<NasLogFileDao> thisRepository, IUserHolder userHolder)
         {
             _thisRepository = thisRepository;
-            _UserService = userHolder;
+            _UserHolder = userHolder;
         }
 
         /// <summary>
@@ -32,7 +32,8 @@ namespace Com.Scm.Nas.Log
         public async Task<ScmSearchPageResponse<NasLogFileDvo>> GetPagesAsync(SearchRequest request)
         {
             var result = await _thisRepository.AsQueryable()
-                .WhereIF(IsValidId(request.terminal_id), a => a.terminal_id == request.terminal_id)
+                .WhereIF(IsNormalId(request.terminal_id), a => a.terminal_id == request.terminal_id)
+                .WhereIF(IsNormalId(request.drive_id), a => a.drive_id == request.drive_id)
                 .WhereIF(request.opt != NasOptEnums.None, a => a.opt == request.opt)
                 //.WhereIF(!string.IsNullOrEmpty(request.key), a => a.text.Contains(request.key))
                 .OrderBy(m => m.id)

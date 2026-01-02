@@ -2,11 +2,11 @@
 	<sc-search ref="search" @search="search">
 		<template #search>
 			<el-form ref="formRef" label-width="80px" :model="param">
-				<el-form-item label="查询选项" prop="option_id">
-					<sc-select v-model="param.option_id" placeholder="请选择" :data="option_list" />
+				<el-form-item label="终端" prop="terminal_id">
+					<sc-select v-model="param.terminal_id" placeholder="请选择" :data="terminal_list" />
 				</el-form-item>
-				<el-form-item label="数据状态" prop="row_status">
-					<sc-select v-model="param.row_status" placeholder="请选择" :data="row_status_list" />
+				<el-form-item label="驱动" prop="drive_id">
+					<sc-select v-model="param.drive_id" placeholder="请选择" :data="drive_list" />
 				</el-form-item>
 				<el-form-item label="创建时间" prop="create_time">
 					<el-date-picker v-model="param.create_time" type="datetimerange" range-separator="至"
@@ -17,24 +17,7 @@
 	</sc-search>
 	<el-container>
 		<el-header>
-			<div class="left-panel">
-				<el-button icon="el-icon-plus" type="primary" @click="open_dialog()" />
-				<el-divider direction="vertical"></el-divider>
-				<el-button-group>
-					<el-tooltip content="启用">
-						<el-button type="primary" icon="el-icon-circle-check" plain :disabled="selection.length == 0"
-							@click="status_list(1)"></el-button>
-					</el-tooltip>
-					<el-tooltip content="停用">
-						<el-button type="primary" icon="el-icon-circle-close" plain :disabled="selection.length == 0"
-							@click="status_list(2)"></el-button>
-					</el-tooltip>
-					<el-tooltip content="删除">
-						<el-button type="danger" icon="el-icon-delete" plain :disabled="selection.length == 0"
-							@click="delete_list"></el-button>
-					</el-tooltip>
-				</el-button-group>
-			</div>
+			<div class="left-panel"></div>
 			<div class="right-panel">
 				<el-input v-model="param.key" clearable placeholder="关键字">
 					<template #append>
@@ -49,29 +32,16 @@
 				@menu-handle="menuHandle" @selection-change="selectionChange">
 				<el-table-column align="center" fixed type="selection" width="60" />
 				<el-table-column label="#" type="index" width="50"></el-table-column>
-				<el-table-column label="操作" align="center" fixed="right" width="140">
+				<el-table-column label="操作" align="center" fixed="right" width="80">
 					<template #default="scope">
 						<el-button text type="primary" size="small" @click="open_dialog(scope.row)">
-							编辑
+							详情
 						</el-button>
-						<el-divider direction="vertical" />
-						<el-popconfirm title="确定删除吗？" @confirm="table_del(scope.row, scope.$index)">
-							<template #reference>
-								<el-button text type="primary" size="small">删除</el-button>
-							</template>
-						</el-popconfirm>
 					</template>
 				</el-table-column>
-				<template #row_status="scope">
-					<el-tooltip :content="scope.row.row_status ? '正常' : '停用'" placement="right">
-						<el-switch v-model="scope.row.row_status" :active-value="1" :inactive-value="2"
-							@change="status_item($event, scope.row)">
-						</el-switch>
-					</el-tooltip>
-				</template>
 			</scTable>
 		</el-main>
-		<edit ref="edit" @complete="complete" />
+		<info ref="info" @complete="complete" />
 	</el-container>
 </template>
 <script>
@@ -79,15 +49,15 @@ import { defineAsyncComponent } from "vue";
 export default {
 	name: 'naslogfile',
 	components: {
-		edit: defineAsyncComponent(() => import("./edit")),
+		info: defineAsyncComponent(() => import("./info")),
 	},
 	data() {
 		return {
 			tableName: 'naslogfile',
 			apiObj: this.$API.naslogfile.page,
-			list: [],
 			param: {
-				option_id: this.$SCM.ID_ALL,
+				terminal_id: this.$SCM.ID_ALL,
+				drive_id: this.$SCM.ID_ALL,
 				row_status: this.$SCM.DEF_STATUS,
 				create_time: '',
 				key: ''
@@ -100,18 +70,17 @@ export default {
 				{ prop: 'type', label: '文件类型', width: 100 },
 				{ prop: 'opt', label: '操作类型', width: 100 },
 				{ prop: 'dir', label: '同步方向', width: 100 },
-				{ prop: 'file', label: '同步文件', width: 100 },
-				{ prop: 'hash', label: '文件摘要', width: 100 },
-				{ prop: "row_status", label: "数据状态", width: 80, },
+				{ prop: 'name', label: '文件名称', minWidth: 140, align: 'left' },
 				{ prop: "update_time", label: "更新时间", width: 160, formatter: this.$TOOL.dateTimeFormat },
 				{ prop: "create_time", label: "创建时间", width: 160, formatter: this.$TOOL.dateTimeFormat },
 			],
-			row_status_list: [this.$SCM.OPTION_ALL_INT],
-			option_list: [this.$SCM.OPTION_ALL],
+			terminal_list: [this.$SCM.OPTION_ALL],
+			drive_list: [this.$SCM.OPTION_ALL],
 		};
 	},
 	mounted() {
-		this.$SCM.list_status(this.row_status_list, true);
+		this.$SCM.list_option(this.terminal_list, this.$API.scmurterminal.option, {}, true);
+		this.$SCM.list_option(this.drive_list, this.$API.scmurterminal.option, {}, true);
 	},
 	methods: {
 		complete() {
@@ -136,7 +105,7 @@ export default {
 			this.$refs.search.open(this.param.key);
 		},
 		open_dialog(row) {
-			this.$refs.edit.open(row);
+			this.$refs.info.open(row);
 		},
 		selectionChange(selection) {
 			this.selection = selection;

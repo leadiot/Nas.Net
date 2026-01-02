@@ -24,7 +24,7 @@ namespace Com.Scm.Nas.Res.Doc
         public NasFileDocService(SugarRepository<NasResFileDocDao> thisRepository, IUserHolder userHolder)
         {
             _thisRepository = thisRepository;
-            _UserService = userHolder;
+            _UserHolder = userHolder;
         }
 
         /// <summary>

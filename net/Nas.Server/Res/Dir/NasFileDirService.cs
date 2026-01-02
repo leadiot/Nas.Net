@@ -24,7 +24,7 @@ namespace Com.Scm.Nas.Res.Dir
         public NasFileDirService(SugarRepository<NasResFileDirDao> thisRepository, IUserHolder userHolder)
         {
             _thisRepository = thisRepository;
-            _UserService = userHolder;
+            _UserHolder = userHolder;
         }
 
         /// <summary>

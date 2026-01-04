@@ -174,7 +174,7 @@ export default {
 			if (this.selection.length != 1) {
 				return;
 			}
-			this.$SCM.delete_item(this, this.$API.scmurterminal.unbind, this.selection[0].id);
+			this.$API.scmurterminal.unbind.post(this.selection[0].id);
 		}
 	},
 };

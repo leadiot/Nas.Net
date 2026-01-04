@@ -72,10 +72,10 @@ export default {
 		}
 	},
 	unbind: {
-		url: `${config.API_URL}/scmurterminal/release`,
+		url: `${config.API_URL}/scmurterminal/release/`,
 		name: "选择",
-		post: async function (data) {
-			return await http.post(this.url, data);
+		post: async function (id) {
+			return await http.post(this.url + id);
 		}
 	},
 }

@@ -34,6 +34,8 @@
 							@click="delete_list"></el-button>
 					</el-tooltip>
 				</el-button-group>
+				<el-divider direction="vertical"></el-divider>
+				<el-button icon="el-icon-plus" type="danger" :disabled="selection.length != 1" @click="unbind()" />
 			</div>
 			<div class="right-panel">
 				<el-input v-model="param.key" clearable placeholder="关键字">
@@ -62,6 +64,11 @@
 						</el-popconfirm>
 					</template>
 				</el-table-column>
+				<template #names="scope">
+					<el-button type="text" link @click="open(scope.row)">
+						{{ scope.row.names }}
+					</el-button>
+				</template>
 				<template #row_status="scope">
 					<el-tooltip :content="scope.row.row_status ? '正常' : '停用'" placement="right">
 						<el-switch v-model="scope.row.row_status" :active-value="1" :inactive-value="2"
@@ -72,6 +79,7 @@
 			</scTable>
 		</el-main>
 		<edit ref="edit" @complete="complete" />
+		<info ref="info" />
 	</el-container>
 </template>
 <script>
@@ -80,6 +88,7 @@ export default {
 	name: 'scm_ur_terminal',
 	components: {
 		edit: defineAsyncComponent(() => import("./edit")),
+		info: defineAsyncComponent(() => import("./info")),
 	},
 	data() {
 		return {
@@ -96,7 +105,7 @@ export default {
 			column: [
 				{ label: "id", prop: "id", hide: true },
 				{ prop: 'types', label: '终端类型', width: 160, align: 'left', formatter: this.getTypesNames },
-				{ prop: 'codes', label: '终端代码', width: 100 },
+				{ prop: 'codes', label: '终端代码', width: 140 },
 				{ prop: 'names', label: '终端名称', minWidth: 140, align: 'left' },
 				{ prop: 'pass', label: '终端授权', width: 140, align: 'left' },
 				{ prop: "row_status", label: "数据状态", width: 80, },
@@ -158,6 +167,15 @@ export default {
 		getTypesNames(id) {
 			return this.$SCM.get_dic_names(this.types_list, id, '-');
 		},
+		open(row) {
+			this.$refs.info.open(row);
+		},
+		unbind() {
+			if (this.selection.length != 1) {
+				return;
+			}
+			this.$SCM.delete_item(this, this.$API.scmurterminal.unbind, this.selection[0].id);
+		}
 	},
 };
 </script>

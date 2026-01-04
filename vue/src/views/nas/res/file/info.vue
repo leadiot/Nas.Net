@@ -9,6 +9,10 @@
 				<el-input v-model="formData.drive_id" placeholder="请输入驱动ID" :maxlength="20" show-word-limit
 					clearable></el-input>
 			</el-form-item>
+			<el-form-item label="目录ID" prop="dir_id">
+				<el-input v-model="formData.dir_id" placeholder="请输入目录ID" :maxlength="20" show-word-limit
+					clearable></el-input>
+			</el-form-item>
 			<el-form-item label="名称" prop="name">
 				<el-input v-model="formData.name" placeholder="请输入名称" :maxlength="256" show-word-limit
 					clearable></el-input>
@@ -17,19 +21,18 @@
 				<el-input v-model="formData.path" placeholder="请输入路径" :maxlength="2048" show-word-limit
 					clearable></el-input>
 			</el-form-item>
-			<el-form-item label="目录ID" prop="dir_id">
-				<el-input v-model="formData.dir_id" placeholder="请输入目录ID" :maxlength="20" show-word-limit
+			<el-form-item label="文档大小" prop="size">
+				<el-input v-model="formData.size" placeholder="请输入文档大小" :maxlength="20" show-word-limit
 					clearable></el-input>
 			</el-form-item>
-			<el-form-item label="数量" prop="qty">
-				<el-input v-model="formData.qty" placeholder="请输入数量" :maxlength="11" show-word-limit
+			<el-form-item label="文档摘要" prop="hash">
+				<el-input v-model="formData.hash" placeholder="请输入文档摘要" :maxlength="64" show-word-limit
 					clearable></el-input>
 			</el-form-item>
 			<el-form-item label="版本" prop="ver">
 				<el-input v-model="formData.ver" placeholder="请输入版本" :maxlength="20" show-word-limit
 					clearable></el-input>
 			</el-form-item>
-
 		</el-form>
 
 		<template #footer>
@@ -69,12 +72,12 @@ export default {
 				id: this.$SCM.DEF_ID,
 				terminal_id: this.$SCM.DEF_ID,
 				drive_id: this.$SCM.DEF_ID,
+				dir_id: this.$SCM.DEF_ID,
 				name: '',
 				path: '',
-				dir_id: '',
-				qty: '',
+				size: '',
+				hash: '',
 				ver: '',
-
 			}
 		},
 		async open(row) {
@@ -82,7 +85,7 @@ export default {
 				this.mode = "add";
 			} else {
 				this.mode = "edit";
-				var res = await this.$API.nasfiledir.edit.get(row.id);
+				var res = await this.$API.nasresfile.edit.get(row.id);
 				this.formData = res.data;
 			}
 			this.visible = true;
@@ -96,9 +99,9 @@ export default {
 				this.isSaveing = true;
 				let res = null;
 				if (this.$SCM.is_valid_id(this.formData.id)) {
-					res = await this.$API.nasfiledir.update.put(this.formData);
+					res = await this.$API.nasresfile.update.put(this.formData);
 				} else {
-					res = await this.$API.nasfiledir.add.post(this.formData);
+					res = await this.$API.nasresfile.add.post(this.formData);
 				}
 				this.isSaveing = false;
 

@@ -53,7 +53,7 @@ export default {
 	},
 	data() {
 		return {
-			tableName: 'naslogfile',
+			tableName: 'nas_log_file',
 			apiObj: this.$API.naslogfile.page,
 			param: {
 				terminal_id: this.$SCM.ID_ALL,

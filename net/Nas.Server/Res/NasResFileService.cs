@@ -2,26 +2,26 @@ using Com.Scm.Dsa;
 using Com.Scm.Dvo;
 using Com.Scm.Enums;
 using Com.Scm.Exceptions;
-using Com.Scm.Nas.Res.Doc.Dvo;
+using Com.Scm.Nas.Res.Dvo;
 using Com.Scm.Service;
 using Com.Scm.Utils;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Com.Scm.Nas.Res.Doc
+namespace Com.Scm.Nas.Res
 {
     /// <summary>
     /// 文档服务接口
     /// </summary>
     [ApiExplorerSettings(GroupName = "Nas")]
-    public class NasFileDocService : ApiService
+    public class NasResFileService : ApiService
     {
-        private readonly SugarRepository<NasResFileDocDao> _thisRepository;
+        private readonly SugarRepository<NasResFileDao> _thisRepository;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="thisRepository"></param>
-        public NasFileDocService(SugarRepository<NasResFileDocDao> thisRepository, IUserHolder userHolder)
+        public NasResFileService(SugarRepository<NasResFileDao> thisRepository, IUserHolder userHolder)
         {
             _thisRepository = thisRepository;
             _UserHolder = userHolder;
@@ -32,14 +32,16 @@ namespace Com.Scm.Nas.Res.Doc
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<ScmSearchPageResponse<NasFileDocDvo>> GetPagesAsync(ScmSearchPageRequest request)
+        public async Task<ScmSearchPageResponse<NasResFileDvo>> GetPagesAsync(SearchRequest request)
         {
             var result = await _thisRepository.AsQueryable()
+                .Where(a => a.dir_id == request.dir_id)
                 .WhereIF(!request.IsAllStatus(), a => a.row_status == request.row_status)
                 //.WhereIF(IsValidId(request.option_id), a => a.option_id == request.option_id)
                 .WhereIF(!string.IsNullOrEmpty(request.key), a => a.name.Contains(request.key))
+                .OrderBy(a => a.type)
                 .OrderBy(m => m.id)
-                .Select<NasFileDocDvo>()
+                .Select<NasResFileDvo>()
                 .ToPageAsync(request.page, request.limit);
 
             Prepare(result.Items);
@@ -51,13 +53,13 @@ namespace Com.Scm.Nas.Res.Doc
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<List<NasFileDocDvo>> GetListAsync(ScmSearchRequest request)
+        public async Task<List<NasResFileDvo>> GetListAsync(ScmSearchRequest request)
         {
             var result = await _thisRepository.AsQueryable()
                 .Where(a => a.row_status == Com.Scm.Enums.ScmRowStatusEnum.Enabled)
                 .WhereIF(!string.IsNullOrEmpty(request.key), a => a.name.Contains(request.key))
                 .OrderBy(m => m.id)
-                .Select<NasFileDocDvo>()
+                .Select<NasResFileDvo>()
                 .ToListAsync();
 
             Prepare(result);
@@ -70,12 +72,12 @@ namespace Com.Scm.Nas.Res.Doc
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<NasFileDocDto> GetAsync(long id)
+        public async Task<NasResFileDto> GetAsync(long id)
         {
             return await _thisRepository
                 .AsQueryable()
                 .Where(a => a.id == id)
-                .Select<NasFileDocDto>()
+                .Select<NasResFileDto>()
                 .FirstAsync();
         }
 
@@ -85,12 +87,12 @@ namespace Com.Scm.Nas.Res.Doc
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<NasFileDocDvo> GetViewAsync(long id)
+        public async Task<NasResFileDvo> GetViewAsync(long id)
         {
             return await _thisRepository
                 .AsQueryable()
                 .Where(a => a.id == id)
-                .Select<NasFileDocDvo>()
+                .Select<NasResFileDvo>()
                 .FirstAsync();
         }
 
@@ -116,12 +118,12 @@ namespace Com.Scm.Nas.Res.Doc
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<NasFileDocDto> GetEditAsync(long id)
+        public async Task<NasResFileDto> GetEditAsync(long id)
         {
             return await _thisRepository
                 .AsQueryable()
                 .Where(a => a.id == id)
-                .Select<NasFileDocDto>()
+                .Select<NasResFileDto>()
                 .FirstAsync();
         }
 
@@ -130,7 +132,7 @@ namespace Com.Scm.Nas.Res.Doc
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public async Task<bool> AddAsync(NasFileDocDto model)
+        public async Task<bool> AddAsync(NasResFileDto model)
         {
             var dao = await _thisRepository.GetFirstAsync(a => a.name == model.name && a.dir_id == model.dir_id);
             if (dao != null)
@@ -138,7 +140,7 @@ namespace Com.Scm.Nas.Res.Doc
                 throw new BusinessException("已存在相同名称的文档！");
             }
 
-            dao = model.Adapt<NasResFileDocDao>();
+            dao = model.Adapt<NasResFileDao>();
             return await _thisRepository.InsertAsync(dao);
         }
 
@@ -147,7 +149,7 @@ namespace Com.Scm.Nas.Res.Doc
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public async Task<bool> UpdateAsync(NasFileDocDto model)
+        public async Task<bool> UpdateAsync(NasResFileDto model)
         {
             var dao = await _thisRepository.GetFirstAsync(a => a.name == model.name && a.dir_id == model.dir_id && a.id != model.id);
             if (dao != null)

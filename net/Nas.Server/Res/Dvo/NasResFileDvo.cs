@@ -1,21 +1,21 @@
 using Com.Scm.Dvo;
 
-namespace Com.Scm.Nas.Res.Dir.Dvo
+namespace Com.Scm.Nas.Res.Dvo
 {
     /// <summary>
-    /// 目录
+    /// 文档
     /// </summary>
-    public class NasFileDirDvo : ScmDataDvo
+    public class NasResFileDvo : ScmDataDvo
     {
         /// <summary>
-        /// 终端ID
+        /// 文件类型
         /// </summary>
-        public long terminal_id { get; set; }
+        public NasTypeEnums type { get; set; }
 
         /// <summary>
-        /// 驱动ID
+        /// 目录ID
         /// </summary>
-        public long drive_id { get; set; }
+        public long dir_id { get; set; }
 
         /// <summary>
         /// 名称
@@ -28,14 +28,14 @@ namespace Com.Scm.Nas.Res.Dir.Dvo
         public string path { get; set; }
 
         /// <summary>
-        /// 目录ID
+        /// 文档大小
         /// </summary>
-        public long dir_id { get; set; }
+        public long size { get; set; }
 
         /// <summary>
-        /// 数量
+        /// 文档摘要
         /// </summary>
-        public int qty { get; set; }
+        public string hash { get; set; }
 
         /// <summary>
         /// 版本

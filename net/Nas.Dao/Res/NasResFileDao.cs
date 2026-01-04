@@ -18,18 +18,6 @@ namespace Com.Scm.Nas.Res
         public NasTypeEnums type { get; set; }
 
         /// <summary>
-        /// 终端ID
-        /// </summary>
-        //[Required]
-        //public long terminal_id { get; set; }
-
-        /// <summary>
-        /// 驱动ID
-        /// </summary>
-        //[Required]
-        //public long drive_id { get; set; }
-
-        /// <summary>
         /// 目录ID
         /// </summary>
         [Required]

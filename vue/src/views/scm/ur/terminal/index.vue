@@ -104,10 +104,10 @@ export default {
 			selection: [],
 			column: [
 				{ label: "id", prop: "id", hide: true },
-				{ prop: 'types', label: '终端类型', width: 160, align: 'left', formatter: this.getTypesNames },
-				{ prop: 'codes', label: '终端代码', width: 140 },
+				{ prop: 'types', label: '终端类型', width: 130, align: 'left', formatter: this.getTypesNames },
+				{ prop: 'codes', label: '终端代码', width: 150 },
 				{ prop: 'names', label: '终端名称', minWidth: 140, align: 'left' },
-				{ prop: 'pass', label: '终端授权', width: 140, align: 'left' },
+				{ prop: 'pass', label: '终端授权', width: 170, align: 'left' },
 				{ prop: "row_status", label: "数据状态", width: 80, },
 				{ prop: "update_names", label: "更新人员", width: 100, },
 				{ prop: "update_time", label: "更新时间", width: 160, formatter: this.$TOOL.dateTimeFormat },

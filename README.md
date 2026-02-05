@@ -96,7 +96,7 @@ Nas.Net基于【Scm.Net】项目开发，它的目标是为用户提供一个简
 ![设备绑定](https://gitee.com/openscm/nas.net/raw/master/screenshots/win-01-bind.png)  
   - 用户首页
 ![用户首页](https://gitee.com/openscm/nas.net/raw/master/screenshots/win-02-home.png)  
-  - 添加同步目录
+  - 添加同步目录  
 ![添加同步目录](https://gitee.com/openscm/nas.net/raw/master/screenshots/win-03-folder.png)  
   - 同步目录
 ![同步目录](https://gitee.com/openscm/nas.net/raw/master/screenshots/win-04-folder.png)  

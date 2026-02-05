@@ -72,26 +72,43 @@ Nas.Net基于【Scm.Net】项目开发，它的目标是为用户提供一个简
  
 ## 软件截图
 - **环境配置**：  
+  - 本地目录
 ![本地目录](https://gitee.com/openscm/nas.net/raw/master/screenshots/env-01-path.png)  
+  - Web端主程序
 ![Web端主程序](https://gitee.com/openscm/nas.net/raw/master/screenshots/env-02-main.png)  
+  - Web端启动成功
 ![Web端启动成功](https://gitee.com/openscm/nas.net/raw/master/screenshots/env-03-web.png)  
+  - 桌面端主程序
 ![桌面端主程序](https://gitee.com/openscm/nas.net/raw/master/screenshots/env-04-net.png)  
   
 - **网页端**：  
-![用户登录](https://gitee.com/openscm/nas.net/raw/master/screenshots/web-01-login.png)  
-![用户首页](https://gitee.com/openscm/nas.net/raw/master/screenshots/web-02-home.png)  
+  - 用户登录
+![用户登录](https://gitee.com/openscm/nas.net/raw/master/screenshots/web-01-login.png)
+  - 用户首页
+![用户首页](https://gitee.com/openscm/nas.net/raw/master/screenshots/web-02-home.png)
+  - 文件管理
 ![文件管理](https://gitee.com/openscm/nas.net/raw/master/screenshots/web-03-file.png)  
+  - 终端管理
 ![终端管理](https://gitee.com/openscm/nas.net/raw/master/screenshots/web-04-terminal.png)  
+  - 远端目录
 ![远端目录](https://gitee.com/openscm/nas.net/raw/master/screenshots/15-remote.png)  
 
 - **桌面端**：  
+  - 设备绑定
 ![设备绑定](https://gitee.com/openscm/nas.net/raw/master/screenshots/win-01-bind.png)  
+  - 用户首页
 ![用户首页](https://gitee.com/openscm/nas.net/raw/master/screenshots/win-02-home.png)  
+  - 添加同步目录
 ![添加同步目录](https://gitee.com/openscm/nas.net/raw/master/screenshots/win-03-folder.png)  
+  - 同步目录
 ![同步目录](https://gitee.com/openscm/nas.net/raw/master/screenshots/win-04-folder.png)  
+  - 同步日志
 ![同步日志](https://gitee.com/openscm/nas.net/raw/master/screenshots/win-05-sync.png)    
+  - 本地文件
 ![本地文件](https://gitee.com/openscm/nas.net/raw/master/screenshots/win-06-native.png)    
+  - 远端文件
 ![远端文件](https://gitee.com/openscm/nas.net/raw/master/screenshots/win-07-remote.png)    
+  - 关于软件
 ![关于软件](https://gitee.com/openscm/nas.net/raw/master/screenshots/win-08-about.png)  
 
 ## QQ 交流群

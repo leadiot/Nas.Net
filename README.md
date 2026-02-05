@@ -90,8 +90,6 @@ Nas.Net基于【Scm.Net】项目开发，它的目标是为用户提供一个简
 ![文件管理](https://gitee.com/openscm/nas.net/raw/master/screenshots/web-03-file.png)  
   - 终端管理
 ![终端管理](https://gitee.com/openscm/nas.net/raw/master/screenshots/web-04-terminal.png)  
-  - 远端目录
-![远端目录](https://gitee.com/openscm/nas.net/raw/master/screenshots/15-remote.png)  
 
 - **桌面端**：  
   - 设备绑定

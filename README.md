@@ -22,7 +22,6 @@
 4. **⚡ 轻量高效，基于 .NET**：依托 .NET 跨平台技术，性能优异，资源占用低，运行稳定可靠。
 
 ## 软件截图
-- **环境配置**： 
 - **网页端**：  
   - 用户登录
 ![用户登录](screenshots/wos-01-login.png)
@@ -59,6 +58,17 @@
   - 关于软件
 ![关于软件](screenshots/win-08-about.png)  
  
+- **移动端**：  
+  - 设备绑定
+![设备绑定](screenshots/aos-01-bind.png)  
+  - 同步目录
+![同步目录](screenshots/aos-03-folder.png)  
+  - 同步日志
+![同步日志](screenshots/aos-04-log.png)    
+  - 关于软件
+![关于软件](screenshots/aos-07-about.png)  
+ 
+- **环境配置**： 
   - 本地目录
 ![本地目录](screenshots/env-01-path.png)  
   - Web端主程序

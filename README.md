@@ -43,10 +43,6 @@
 #### 桌面端：  
   - 设备绑定
 ![设备绑定](screenshots/win-01-bind.png)  
-  - 用户首页
-![用户首页](screenshots/win-02-home.png)  
-  - 添加同步目录  
-![添加同步目录](screenshots/win-03-folder.png)  
   - 同步目录
 ![同步目录](screenshots/win-04-folder.png)  
   - 同步日志

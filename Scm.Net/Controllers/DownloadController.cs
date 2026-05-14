@@ -1,5 +1,4 @@
 ﻿using Com.Scm.Config;
-using Com.Scm.Controllers;
 using Com.Scm.Filters;
 using Com.Scm.Http;
 using Com.Scm.Nas.Sync;
@@ -10,6 +9,7 @@ using SqlSugar;
 
 namespace Com.Scm.Controllers
 {
+    [ApiExplorerSettings(GroupName = "Scm")]
     public class DownloadController : ApiController
     {
         private EnvConfig _EnvConfig;

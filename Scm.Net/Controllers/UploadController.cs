@@ -1,5 +1,4 @@
 ﻿using Com.Scm.Config;
-using Com.Scm.Controllers;
 using Com.Scm.Nas;
 using Com.Scm.Utils;
 using Microsoft.AspNetCore.Authorization;

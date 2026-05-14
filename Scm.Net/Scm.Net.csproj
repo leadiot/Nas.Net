@@ -32,18 +32,23 @@
   <ItemGroup>
     <PackageReference Include="MailKit" Version="4.16.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.8" />
+    <PackageReference Include="Quartz" Version="3.18.1" />
     <PackageReference Include="Serilog" Version="4.3.1" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="SixLabors.Fonts" Version="3.0.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="4.0.0" />
-    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="3.0.0" />
+    <PackageReference Include="SixLabors.Fonts" Version="2.1.3" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.7" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.7" />
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Scm.Aiml">
+      <HintPath>..\..\Libs\net10.0\Scm.Aiml.dll</HintPath>
+    </Reference>
     <Reference Include="Scm.Cache">
       <HintPath>..\..\Libs\net10.0\Scm.Cache.dll</HintPath>
     </Reference>
@@ -68,14 +73,29 @@
     <Reference Include="Scm.Common.Text">
       <HintPath>..\..\Libs\netstandard2.0\Scm.Common.Text.dll</HintPath>
     </Reference>
+    <Reference Include="Scm.Common.Time">
+      <HintPath>..\..\Libs\netstandard2.0\Scm.Common.Time.dll</HintPath>
+    </Reference>
     <Reference Include="Scm.Core">
       <HintPath>..\..\Libs\net10.0\Scm.Core.dll</HintPath>
     </Reference>
     <Reference Include="Scm.Dao">
       <HintPath>..\..\Libs\net10.0\Scm.Dao.dll</HintPath>
     </Reference>
+    <Reference Include="Scm.Dsa.Dba.Sugar">
+      <HintPath>..\..\Libs\net10.0\Scm.Dsa.Dba.Sugar.dll</HintPath>
+    </Reference>
+    <Reference Include="Scm.Dto">
+      <HintPath>..\..\Libs\net10.0\Scm.Dto.dll</HintPath>
+    </Reference>
+    <Reference Include="Scm.Email">
+      <HintPath>..\..\Libs\net10.0\Scm.Email.dll</HintPath>
+    </Reference>
     <Reference Include="Scm.Generator">
       <HintPath>..\..\Libs\net10.0\Scm.Generator.dll</HintPath>
+    </Reference>
+    <Reference Include="Scm.Phone">
+      <HintPath>..\..\Libs\net10.0\Scm.Phone.dll</HintPath>
     </Reference>
     <Reference Include="Scm.Plugin.Image">
       <HintPath>..\..\Libs\net10.0\Scm.Plugin.Image.dll</HintPath>
@@ -85,6 +105,12 @@
     </Reference>
     <Reference Include="Scm.Server">
       <HintPath>..\..\Libs\net10.0\Scm.Server.dll</HintPath>
+    </Reference>
+    <Reference Include="Scm.Server.Aiml">
+      <HintPath>..\..\Libs\net10.0\Scm.Server.Aiml.dll</HintPath>
+    </Reference>
+    <Reference Include="Scm.Server.Api">
+      <HintPath>..\..\Libs\net10.0\Scm.Server.Api.dll</HintPath>
     </Reference>
     <Reference Include="Scm.Server.Cache">
       <HintPath>..\..\Libs\net10.0\Scm.Server.Cache.dll</HintPath>
@@ -97,9 +123,6 @@
     </Reference>
     <Reference Include="Scm.Server.Service">
       <HintPath>..\..\Libs\net10.0\Scm.Server.Service.dll</HintPath>
-    </Reference>
-    <Reference Include="Scm.Server.SignalR">
-      <HintPath>..\..\Libs\net10.0\Scm.Server.SignalR.dll</HintPath>
     </Reference>
     <Reference Include="Scm.Server.Swagger">
       <HintPath>..\..\Libs\net10.0\Scm.Server.Swagger.dll</HintPath>

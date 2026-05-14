@@ -6,6 +6,7 @@ using Com.Scm.Dsa.Dba.Sugar.UnitOfWork.Filters;
 using Com.Scm.Email.Config;
 using Com.Scm.Extensions;
 using Com.Scm.Generator.Config;
+using Com.Scm.Helper;
 using Com.Scm.Holder;
 using Com.Scm.Hubs;
 using Com.Scm.Image.ImageSharp;
@@ -15,7 +16,6 @@ using Com.Scm.Nas;
 using Com.Scm.Phone.Config;
 using Com.Scm.Quartz;
 using Com.Scm.Quartz.Config;
-using Com.Scm.Samples;
 using Com.Scm.Server;
 using Com.Scm.Service;
 using Com.Scm.Uid.Config;
@@ -141,7 +141,6 @@ namespace Com.Scm
             services.AddScoped<IFlowService, ScmFlowService>();
 
             // 自定义服务
-            SamplesServerUtils.Setup(services);
 
             // 全局过滤
             services.AddControllers(options =>
@@ -207,7 +206,7 @@ namespace Com.Scm
             {
                 if (corsConfig.GlobalCors)
                 {
-                    app.UseCors(ScmEnv.SCM_CORS);
+                    app.UseCors(ScmEnv.CORS_NAME);
                 }
                 else
                 {
@@ -336,10 +335,6 @@ namespace Com.Scm
 
             var sqlDir = envConfig.GetDataPath("sql");
             IModelHelper dbHelper = new ScmDbHelper();
-            dbHelper.Init(sugarScope, sqlDir);
-            dbHelper.InitDb();
-
-            dbHelper = new SamplesDbHelper();
             dbHelper.Init(sugarScope, sqlDir);
             dbHelper.InitDb();
 

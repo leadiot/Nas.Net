@@ -67,7 +67,8 @@ namespace Com.Scm.Nas.Download.Strategy
             var downloadTasks = new Task[threads];
             var chunkBytes = new long[threads];
             var chunkStarts = new long[threads];
-            var totalDownloaded = 0L;
+
+            long existingTotal = 0L;
 
             for (int i = 0; i < threads; i++)
             {
@@ -85,6 +86,7 @@ namespace Com.Scm.Nas.Download.Strategy
                 }
 
                 chunkStarts[idx] = existingSize;
+                existingTotal += existingSize;
                 long from = idx * chunkSize + existingSize;
                 long to = (idx == threads - 1) ? fileSize - 1 : from + chunkSize - 1;
 
@@ -94,8 +96,7 @@ namespace Com.Scm.Nas.Download.Strategy
                         bytes =>
                         {
                             Interlocked.Add(ref chunkBytes[idx], bytes);
-                            Interlocked.Exchange(ref totalDownloaded, chunkBytes.Sum());
-                            task.DownloadedSize = totalDownloaded;
+                            task.DownloadedSize = existingTotal + chunkBytes.Sum();
                             task.UpdateSpeed();
                         }, cancellationToken);
                 }
@@ -105,7 +106,7 @@ namespace Com.Scm.Nas.Download.Strategy
                 }
             }
 
-            task.DownloadedSize = chunkBytes.Sum();
+            task.DownloadedSize = existingTotal + chunkBytes.Sum();
             await Task.WhenAll(downloadTasks);
 
             await MergeChunksAsync(tempFiles, task.FullPath);
@@ -165,21 +166,49 @@ namespace Com.Scm.Nas.Download.Strategy
         }
 
         /// <summary>
-        /// 单线程流式下载（Range 不支持或文件大小未知时）
+        /// 单线程流式下载（支持断点续传）
         /// </summary>
         private async Task DownloadSingleThreadAsync(NasDownloadTask task, CancellationToken cancellationToken)
         {
-            using var response = await _httpClient.GetAsync(task.Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            long existingSize = 0;
+            if (File.Exists(task.FullPath))
+            {
+                try
+                {
+                    existingSize = new FileInfo(task.FullPath).Length;
+                }
+                catch { }
+            }
+
+            task.DownloadedSize = existingSize;
+
+            if (task.DownloadedSize >= task.TotalSize && task.TotalSize > 0)
+            {
+                return;
+            }
+
+            var request = new HttpRequestMessage(HttpMethod.Get, task.Url);
+            if (existingSize > 0 && task.TotalSize > 0)
+            {
+                request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(existingSize, task.TotalSize - 1);
+            }
+
+            using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             if (task.TotalSize <= 0)
             {
                 task.TotalSize = response.Content.Headers.ContentLength ?? -1;
+                if (task.TotalSize > 0)
+                {
+                    task.TotalSize += existingSize;
+                }
             }
 
+            var fileMode = existingSize > 0 ? FileMode.Append : FileMode.Create;
             using (var stream = await response.Content.ReadAsStreamAsync(cancellationToken))
             {
-                using (var fileStream = new FileStream(task.FullPath, FileMode.Create, FileAccess.Write, FileShare.None, NasEnv.BUFFER_SIZE, true))
+                using (var fileStream = new FileStream(task.FullPath, fileMode, FileAccess.Write, FileShare.None, NasEnv.BUFFER_SIZE, true))
                 {
                     var buffer = new byte[NasEnv.BUFFER_SIZE];
                     int bytesRead;

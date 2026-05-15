@@ -100,6 +100,11 @@ namespace Com.Scm.Nas.Download
         public bool IsPauseRequested { get; set; }
 
         /// <summary>
+        /// 任务超时时间（秒），默认 0 表示不限制
+        /// </summary>
+        public int TimeoutSeconds { get; set; } = 0;
+
+        /// <summary>
         /// 下载进度（0~100）
         /// </summary>
         public double Progress =>

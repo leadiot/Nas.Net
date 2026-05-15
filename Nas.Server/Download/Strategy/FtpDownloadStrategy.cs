@@ -22,8 +22,12 @@ namespace Com.Scm.Nas.Download.Strategy
                 var sizeReq = (FtpWebRequest)WebRequest.Create(task.Url);
 #pragma warning restore SYSLIB0014
                 sizeReq.Method = WebRequestMethods.Ftp.GetFileSize;
-                SetCredentials(sizeReq, task);
+                sizeReq.Credentials = !string.IsNullOrWhiteSpace(task.FtpUser) 
+                    ? new NetworkCredential(task.FtpUser, task.FtpPassword ?? string.Empty) 
+                    : new NetworkCredential("anonymous", "anonymous@nas");
                 sizeReq.UseBinary = true;
+                sizeReq.Timeout = 300000;
+                sizeReq.ReadWriteTimeout = 300000;
 
                 using var sizeResp = (FtpWebResponse)await Task.Factory.FromAsync(
                     sizeReq.BeginGetResponse, sizeReq.EndGetResponse, null);
@@ -39,9 +43,13 @@ namespace Com.Scm.Nas.Download.Strategy
             var req = (FtpWebRequest)WebRequest.Create(task.Url);
 #pragma warning restore SYSLIB0014
             req.Method = WebRequestMethods.Ftp.DownloadFile;
-            SetCredentials(req, task);
+            req.Credentials = !string.IsNullOrWhiteSpace(task.FtpUser) 
+                ? new NetworkCredential(task.FtpUser, task.FtpPassword ?? string.Empty) 
+                : new NetworkCredential("anonymous", "anonymous@nas");
             req.UseBinary = true;
             req.UsePassive = true;
+            req.Timeout = 300000;
+            req.ReadWriteTimeout = 300000;
 
             using var resp = (FtpWebResponse)await Task.Factory.FromAsync(
                 req.BeginGetResponse, req.EndGetResponse, null);
@@ -62,18 +70,6 @@ namespace Com.Scm.Nas.Download.Strategy
                 await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
                 task.DownloadedSize += bytesRead;
                 task.UpdateSpeed();
-            }
-        }
-
-        private static void SetCredentials(FtpWebRequest req, NasDownloadTask task)
-        {
-            if (!string.IsNullOrWhiteSpace(task.FtpUser))
-            {
-                req.Credentials = new NetworkCredential(task.FtpUser, task.FtpPassword ?? string.Empty);
-            }
-            else
-            {
-                req.Credentials = new NetworkCredential("anonymous", "anonymous@nas");
             }
         }
     }

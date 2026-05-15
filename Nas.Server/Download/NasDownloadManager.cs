@@ -144,7 +144,9 @@ namespace Com.Scm.Nas.Download
             await _semaphore.WaitAsync();
             try
             {
-                task.Cts = new CancellationTokenSource();
+                task.Cts = task.TimeoutSeconds > 0 
+                    ? new CancellationTokenSource(TimeSpan.FromSeconds(task.TimeoutSeconds)) 
+                    : new CancellationTokenSource();
                 task.Handle = ScmHandleEnum.Doing;
                 task.SpeedSnapshotTime = DateTime.Now;
                 task.SpeedSnapshotBytes = task.DownloadedSize;

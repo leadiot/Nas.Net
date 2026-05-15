@@ -56,7 +56,7 @@ namespace Com.Scm.Nas.Download.Strategy
         }
 
         /// <summary>
-        /// 多线程分片下载
+        /// 多线程分片下载（支持断点续传）
         /// </summary>
         private async Task DownloadMultiThreadAsync(NasDownloadTask task, long fileSize, CancellationToken cancellationToken)
         {
@@ -66,31 +66,53 @@ namespace Com.Scm.Nas.Download.Strategy
             var tempFiles = new string[threads];
             var downloadTasks = new Task[threads];
             var chunkBytes = new long[threads];
+            var chunkStarts = new long[threads];
+            var totalDownloaded = 0L;
 
             for (int i = 0; i < threads; i++)
             {
                 int idx = i;
-                long from = idx * chunkSize;
-                long to = (idx == threads - 1) ? fileSize - 1 : from + chunkSize - 1;
                 tempFiles[idx] = task.FullPath + $".part{idx}";
 
-                downloadTasks[idx] = DownloadChunkAsync(task.Url, from, to, tempFiles[idx],
-                    bytes =>
+                long existingSize = 0;
+                if (File.Exists(tempFiles[idx]))
+                {
+                    try
                     {
-                        Interlocked.Add(ref chunkBytes[idx], bytes);
-                        task.DownloadedSize = chunkBytes.Sum();
-                        task.UpdateSpeed();
-                    }, cancellationToken);
+                        existingSize = new FileInfo(tempFiles[idx]).Length;
+                    }
+                    catch { }
+                }
+
+                chunkStarts[idx] = existingSize;
+                long from = idx * chunkSize + existingSize;
+                long to = (idx == threads - 1) ? fileSize - 1 : from + chunkSize - 1;
+
+                if (from <= to)
+                {
+                    downloadTasks[idx] = DownloadChunkAsync(task.Url, from, to, tempFiles[idx],
+                        bytes =>
+                        {
+                            Interlocked.Add(ref chunkBytes[idx], bytes);
+                            Interlocked.Exchange(ref totalDownloaded, chunkBytes.Sum());
+                            task.DownloadedSize = totalDownloaded;
+                            task.UpdateSpeed();
+                        }, cancellationToken);
+                }
+                else
+                {
+                    downloadTasks[idx] = Task.CompletedTask;
+                }
             }
 
+            task.DownloadedSize = chunkBytes.Sum();
             await Task.WhenAll(downloadTasks);
 
-            // 合并分片
             await MergeChunksAsync(tempFiles, task.FullPath);
         }
 
         /// <summary>
-        /// 下载单个分片
+        /// 下载单个分片（支持断点续传）
         /// </summary>
         private async Task DownloadChunkAsync(string url, long from, long to, string savePath,
             Action<long> onProgress, CancellationToken cancellationToken)
@@ -101,9 +123,12 @@ namespace Com.Scm.Nas.Download.Strategy
             using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             response.EnsureSuccessStatusCode();
 
+            bool fileExists = File.Exists(savePath);
+            var fileMode = fileExists ? FileMode.Append : FileMode.Create;
+
             using (var readStream = await response.Content.ReadAsStreamAsync(cancellationToken))
             {
-                using (var fileStream = new FileStream(savePath, FileMode.Create, FileAccess.Write, FileShare.None, NasEnv.BUFFER_SIZE, true))
+                using (var fileStream = new FileStream(savePath, fileMode, FileAccess.Write, FileShare.None, NasEnv.BUFFER_SIZE, true))
                 {
                     var buffer = new byte[NasEnv.BUFFER_SIZE];
                     int bytesRead;

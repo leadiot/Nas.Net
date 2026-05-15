@@ -12,7 +12,6 @@ namespace Com.Scm.Nas.Download.Strategy
         {
             Directory.CreateDirectory(task.FilePath);
 
-            // 规范化源路径（去除 file:// 前缀）
             var sourcePath = task.Url;
             if (sourcePath.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
             {
@@ -27,8 +26,31 @@ namespace Com.Scm.Nas.Download.Strategy
             var fileInfo = new FileInfo(sourcePath);
             task.TotalSize = fileInfo.Length;
 
+            long existingSize = 0;
+            if (File.Exists(task.FullPath))
+            {
+                try
+                {
+                    existingSize = new FileInfo(task.FullPath).Length;
+                }
+                catch { }
+            }
+
+            task.DownloadedSize = existingSize;
+
+            if (task.DownloadedSize >= task.TotalSize && task.TotalSize > 0)
+            {
+                return;
+            }
+
+            var destMode = existingSize > 0 ? FileMode.Append : FileMode.Create;
             using var sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, true);
-            using var destStream = new FileStream(task.FullPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true);
+            using var destStream = new FileStream(task.FullPath, destMode, FileAccess.Write, FileShare.None, 81920, true);
+
+            if (existingSize > 0)
+            {
+                sourceStream.Seek(existingSize, SeekOrigin.Begin);
+            }
 
             var buffer = new byte[81920];
             int bytesRead;

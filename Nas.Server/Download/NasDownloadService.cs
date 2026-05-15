@@ -80,7 +80,7 @@ namespace Com.Scm.Nas.Download
             var task = _Manager.Get(id);
             if (task != null)
             {
-                return MapToDto(task);
+                return MapTaskToDto(task);
             }
 
             var dao = await _thisRepository.GetByIdAsync(id);
@@ -205,7 +205,7 @@ namespace Com.Scm.Nas.Download
         /// <summary>
         /// 将运行时任务模型映射为 DTO
         /// </summary>
-        private static NasDownloadDto MapToDto(NasDownloadTask task)
+        private static NasDownloadDto MapTaskToDto(NasDownloadTask task)
         {
             return new NasDownloadDto
             {
@@ -219,6 +219,7 @@ namespace Com.Scm.Nas.Download
                 progress = task.Progress,
                 speed = task.Speed,
                 handle = task.Handle,
+                result = task.Result,
                 message = task.ErrorMessage,
                 create_time = task.CreateTime,
                 finish_time = task.FinishTime,
@@ -243,6 +244,7 @@ namespace Com.Scm.Nas.Download
                 progress = dao.progress,
                 speed = 0,
                 handle = dao.handle,
+                result = dao.result,
                 message = dao.message,
                 create_time = dao.create_time,
                 finish_time = dao.finish_time,
@@ -265,6 +267,7 @@ namespace Com.Scm.Nas.Download
                 TotalSize = dao.total_size,
                 DownloadedSize = dao.downloaded_size,
                 Handle = dao.handle,
+                Result = dao.result,
                 CreateTime = dao.create_time
             };
         }

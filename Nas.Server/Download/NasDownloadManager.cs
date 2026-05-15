@@ -72,11 +72,10 @@ namespace Com.Scm.Nas.Download
             if (!_tasks.TryGetValue(taskId, out var task)) return false;
             if (task.Handle != ScmHandleEnum.Doing) return false;
 
-            var oldStatus = task.Handle;
             task.IsPauseRequested = true;
             task.Cts?.Cancel();
             task.Handle = ScmHandleEnum.Pause;
-            OnStatusChanged?.Invoke(task, task.Handle, task.Result);
+            OnStatusChanged?.Invoke(task, ScmHandleEnum.Pause, task.Result);
             return true;
         }
 
@@ -90,7 +89,16 @@ namespace Com.Scm.Nas.Download
                 return false;
             }
 
-            return task.Handle == ScmHandleEnum.Doing;
+            if (task.Handle != ScmHandleEnum.Pause)
+            {
+                return false;
+            }
+
+            task.Handle = ScmHandleEnum.Doing;
+            task.IsPauseRequested = false;
+            _ = RunTaskAsync(task);
+            OnStatusChanged?.Invoke(task, ScmHandleEnum.Doing, task.Result);
+            return true;
         }
 
         /// <summary>

@@ -15,7 +15,18 @@ namespace Com.Scm.Nas.Download.Strategy
         {
             Directory.CreateDirectory(task.FilePath);
 
-            // 先获取文件大小
+            long existingSize = 0;
+            if (File.Exists(task.FullPath))
+            {
+                try
+                {
+                    existingSize = new FileInfo(task.FullPath).Length;
+                }
+                catch { }
+            }
+
+            task.DownloadedSize = existingSize;
+
             try
             {
 #pragma warning disable SYSLIB0014
@@ -38,7 +49,11 @@ namespace Com.Scm.Nas.Download.Strategy
                 task.TotalSize = -1;
             }
 
-            // 执行下载
+            if (task.DownloadedSize >= task.TotalSize && task.TotalSize > 0)
+            {
+                return;
+            }
+
 #pragma warning disable SYSLIB0014
             var req = (FtpWebRequest)WebRequest.Create(task.Url);
 #pragma warning restore SYSLIB0014
@@ -51,11 +66,17 @@ namespace Com.Scm.Nas.Download.Strategy
             req.Timeout = 300000;
             req.ReadWriteTimeout = 300000;
 
+            if (existingSize > 0)
+            {
+                req.ContentOffset = existingSize;
+            }
+
             using var resp = (FtpWebResponse)await Task.Factory.FromAsync(
                 req.BeginGetResponse, req.EndGetResponse, null);
 
+            var fileMode = existingSize > 0 ? FileMode.Append : FileMode.Create;
             using var ftpStream = resp.GetResponseStream();
-            using var fileStream = new FileStream(task.FullPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true);
+            using var fileStream = new FileStream(task.FullPath, fileMode, FileAccess.Write, FileShare.None, 81920, true);
 
             var buffer = new byte[81920];
             int bytesRead;

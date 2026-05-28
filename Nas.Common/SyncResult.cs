@@ -60,5 +60,18 @@
         {
             return new SyncResult { success = false, code = code, message = message };
         }
+
+        /// <summary>
+        /// 上传文档来源路径为空
+        /// </summary>
+        public const int RESULT_CODE_11 = 11;
+        /// <summary>
+        /// 上传文档不存在！
+        /// </summary>
+        public const int RESULT_CODE_12 = 12;
+        /// <summary>
+        /// 上传文档移动异常
+        /// </summary>
+        public const int RESULT_CODE_13 = 13;
     }
 }

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿using Com.Scm.Config;
+﻿using Com.Scm.Config;
 using Com.Scm.Dto;
 using Com.Scm.Enums;
 using Com.Scm.Filters;
@@ -709,6 +709,7 @@ namespace Com.Scm.Nas.Sync
             if (string.IsNullOrEmpty(dto.src))
             {
                 LogUtils.Error(TAG_CREATE_FILE, "上传文档来源路径为空", dto.src);
+                result.SetFailure(SyncResult.RESULT_CODE_11, "上传文档来源路径为空！");
                 return false;
             }
 
@@ -716,7 +717,7 @@ namespace Com.Scm.Nas.Sync
             if (!FileUtils.ExistsDoc(tmpFile))
             {
                 LogUtils.Error(TAG_CREATE_FILE, "上传文档不存在", tmpFile);
-                result.SetFailure($"上传文档不存在！");
+                result.SetFailure(SyncResult.RESULT_CODE_12, $"上传文档不存在！");
                 return false;
             }
 
@@ -724,7 +725,7 @@ namespace Com.Scm.Nas.Sync
             if (!FileUtils.MoveDoc(tmpFile, dstFile, true))
             {
                 LogUtils.Error(TAG_CREATE_FILE, "上传文档移动异常！");
-                SyncResult.Failure("上传文档移动异常！");
+                SyncResult.Failure(SyncResult.RESULT_CODE_13, "上传文档移动异常！");
                 return false;
             }
 
@@ -1345,6 +1346,7 @@ namespace Com.Scm.Nas.Sync
             if (string.IsNullOrEmpty(dto.src))
             {
                 LogUtils.Error(TAG_CHANGE_FILE, "上传文档来源路径为空", dto.src);
+                result.SetFailure(SyncResult.RESULT_CODE_11, "上传文档来源路径为空！");
                 return false;
             }
 
@@ -1352,7 +1354,7 @@ namespace Com.Scm.Nas.Sync
             if (!FileUtils.ExistsDoc(tmpFile))
             {
                 LogUtils.Error(TAG_CHANGE_FILE, "上传文档不存在", tmpFile);
-                result.SetFailure($"上传文档不存在！");
+                result.SetFailure(SyncResult.RESULT_CODE_12, $"上传文档不存在！");
                 return false;
             }
 
@@ -1363,7 +1365,7 @@ namespace Com.Scm.Nas.Sync
             if (!FileUtils.MoveDoc(tmpFile, dstFile, true))
             {
                 LogUtils.Error(TAG_CHANGE_FILE, "上传文档移动异常！");
-                SyncResult.Failure("上传文档移动异常！");
+                SyncResult.Failure(SyncResult.RESULT_CODE_13, "上传文档移动异常！");
                 return false;
             }
 

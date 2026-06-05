@@ -5,7 +5,7 @@ using Com.Scm.Ur;
 using Com.Scm.Utils;
 using System.Reflection;
 
-namespace Com.Scm.Nas
+namespace Com.Scm.Nas.Helper
 {
     public class NasDbHelper : ScmDbHelper
     {
@@ -37,6 +37,10 @@ namespace Com.Scm.Nas
                 InitDdl(verDao);
 
                 InitDml(verDao);
+            }
+            else if (verDao.ver == VER)
+            {
+                return true;
             }
             else
             {

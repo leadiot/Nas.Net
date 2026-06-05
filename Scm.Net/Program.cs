@@ -12,7 +12,7 @@ using Com.Scm.Hubs;
 using Com.Scm.Image.ImageSharp;
 using Com.Scm.Login.Otp;
 using Com.Scm.Mapper;
-using Com.Scm.Nas;
+using Com.Scm.Nas.Helper;
 using Com.Scm.Phone.Config;
 using Com.Scm.Quartz;
 using Com.Scm.Quartz.Config;

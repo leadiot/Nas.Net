@@ -2,7 +2,7 @@
 using Com.Scm.Dao.User;
 using Com.Scm.Filters;
 using Com.Scm.Helper;
-using Com.Scm.Nas;
+using Com.Scm.Nas.Helper;
 using Com.Scm.Response;
 using Com.Scm.Utils;
 using Microsoft.AspNetCore.Authorization;

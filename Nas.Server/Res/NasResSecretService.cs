@@ -6,7 +6,7 @@ namespace Com.Scm.Nas.Res
 {
     public class NasResSecretService : NasResFileService
     {
-        public NasResSecretService(SugarRepository<NasResFileDao> thisRepository, ISqlSugarClient sqlClient, ScmContextHolder scmHolder, IResHolder resHolder)
+        public NasResSecretService(SugarRepository<NasResFileDao> thisRepository, ISqlSugarClient sqlClient, IScmTokenHolder scmHolder, IResHolder resHolder)
             : base(thisRepository, sqlClient, scmHolder, resHolder)
         {
         }

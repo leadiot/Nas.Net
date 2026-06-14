@@ -1,5 +1,4 @@
-﻿using Com.Scm.Controllers;
-using Com.Scm.Request;
+﻿using Com.Scm.Request;
 using Com.Scm.Response;
 using Com.Scm.Token;
 using Microsoft.AspNetCore.Mvc;
@@ -9,9 +8,9 @@ namespace Com.Scm.Controllers
     [ApiExplorerSettings(GroupName = "Scm")]
     public class TestController : ApiController
     {
-        private ScmContextHolder _ScmHolder;
+        private IScmTokenHolder _ScmHolder;
 
-        public TestController(ScmContextHolder scmHolder)
+        public TestController(IScmTokenHolder scmHolder)
         {
             _ScmHolder = scmHolder;
         }

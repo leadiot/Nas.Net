@@ -11,7 +11,6 @@ using Com.Scm.Service;
 using Com.Scm.Token;
 using Com.Scm.Ur;
 using Com.Scm.Utils;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SqlSugar;
 
@@ -21,10 +20,11 @@ namespace Com.Scm.Nas.Sync
     /// 终端文件同步服务
     /// </summary>
     [NoAuditLog]
-    [AllowAnonymous]
     [ApiExplorerSettings(GroupName = "Scm")]
     public class NasSyncService : AppService
     {
+        private IScmTokenHolder _ScmHolder;
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -33,10 +33,12 @@ namespace Com.Scm.Nas.Sync
         /// <param name="resHolder"></param>
         public NasSyncService(ISqlSugarClient sqlClient,
             EnvConfig envConfig,
+            IScmTokenHolder scmHolder,
             IResHolder resHolder)
         {
             _SqlClient = sqlClient;
             _EnvConfig = envConfig;
+            _ScmHolder = scmHolder;
             _ResHolder = resHolder;
             //_MessageService = messageService;
         }
@@ -59,9 +61,10 @@ namespace Com.Scm.Nas.Sync
         /// 数据初始化
         /// </summary>
         /// <returns></returns>
-        public async Task<List<SyncResFileDao>> PostInitAsync([FromHeader] string appToken)
+        public async Task<List<SyncResFileDao>> PostInitAsync()
         {
-            var token = ScmToken.FromAppToken(appToken);
+            var token = _ScmHolder.GetToken();
+
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
             {
@@ -93,9 +96,10 @@ namespace Com.Scm.Nas.Sync
         /// 获取驱动列表
         /// </summary>
         /// <returns></returns>
-        public async Task<ScmApiListResponse<NasCfgFolderDto>> GetFolderAsync([FromHeader] string appToken)
+        public async Task<ScmApiListResponse<NasCfgFolderDto>> GetFolderAsync()
         {
-            var token = ScmToken.FromAppToken(appToken);
+            var token = _ScmHolder.GetToken();
+
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
             {
@@ -118,9 +122,10 @@ namespace Com.Scm.Nas.Sync
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>
-        public async Task<NasCfgFolderDto> PostFolderAsync(NasCfgFolderDto dto, [FromHeader] string appToken)
+        public async Task<NasCfgFolderDto> PostFolderAsync(NasCfgFolderDto dto)
         {
-            var token = ScmToken.FromAppToken(appToken);
+            var token = _ScmHolder.GetToken();
+
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
             {
@@ -186,9 +191,10 @@ namespace Com.Scm.Nas.Sync
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<ScmPageResultDto<NasLogFileDto>> GetLogAsync(GetLogRequest request, [FromHeader] string appToken)
+        public async Task<ScmPageResultDto<NasLogFileDto>> GetLogAsync(GetLogRequest request)
         {
-            var token = ScmToken.FromAppToken(appToken);
+            var token = _ScmHolder.GetToken();
+
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
             {
@@ -235,9 +241,10 @@ namespace Com.Scm.Nas.Sync
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<ScmPageResultDto<NasResFileDto>> GetDirAsync(GetDirRequest request, [FromHeader] string appToken)
+        public async Task<ScmPageResultDto<NasResFileDto>> GetDirAsync(GetDirRequest request)
         {
-            var token = ScmToken.FromAppToken(appToken);
+            var token = _ScmHolder.GetToken();
+
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
             {
@@ -268,9 +275,10 @@ namespace Com.Scm.Nas.Sync
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<ScmPageResultDto<NasResFileDto>> GetDocAsync(GetDocRequest request, [FromHeader] string appToken)
+        public async Task<ScmPageResultDto<NasResFileDto>> GetDocAsync(GetDocRequest request)
         {
-            var token = ScmToken.FromAppToken(appToken);
+            var token = _ScmHolder.GetToken();
+
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
             {
@@ -302,9 +310,10 @@ namespace Com.Scm.Nas.Sync
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<ScmPageResultDto<NasResFileDto>> GetFileAsync(GetDocRequest request, [FromHeader] string appToken)
+        public async Task<ScmPageResultDto<NasResFileDto>> GetFileAsync(GetDocRequest request)
         {
-            var token = ScmToken.FromAppToken(appToken);
+            var token = _ScmHolder.GetToken();
+
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
             {
@@ -337,8 +346,10 @@ namespace Com.Scm.Nas.Sync
         /// <param name="terminalId"></param>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public async Task<SyncResult> PostSyncAsync(NasLogFileDto dto, [FromHeader] string appToken)
+        public async Task<SyncResult> PostSyncAsync(NasLogFileDto dto)
         {
+            var token = _ScmHolder.GetToken();
+
             if (dto == null)
             {
                 LogUtils.Error("PostSync", "上传对象为空！");
@@ -347,7 +358,6 @@ namespace Com.Scm.Nas.Sync
 
             LogUtils.Info("PostSync", "上传同步日志", dto.ToJsonString());
 
-            var token = ScmToken.FromAppToken(appToken);
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null)
             {

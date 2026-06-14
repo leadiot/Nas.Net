@@ -18,7 +18,7 @@ namespace Com.Scm.Nas.Download
     {
         private static NasDownloadManager _Manager;
 
-        private readonly ScmContextHolder _ScmHolder;
+        private readonly IScmTokenHolder _ScmHolder;
         private readonly SugarRepository<NasDownloadDao> _thisRepository;
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace Com.Scm.Nas.Download
         /// <param name="envConfig">环境配置</param>
         /// <param name="repository">下载任务仓储</param>
         /// <param name="maxConcurrent">最大并发任务数</param>
-        public NasDownloadService(SugarRepository<NasDownloadDao> repository, EnvConfig envConfig, ScmContextHolder scmHolder)
+        public NasDownloadService(SugarRepository<NasDownloadDao> repository, EnvConfig envConfig, IScmTokenHolder scmHolder)
         {
             _thisRepository = repository;
             _EnvConfig = envConfig;

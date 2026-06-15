@@ -8,17 +8,17 @@ namespace Com.Scm.Controllers
     [ApiExplorerSettings(GroupName = "Scm")]
     public class TestController : ApiController
     {
-        private IScmTokenHolder _ScmHolder;
+        private IJwtTokenHolder _JwtHolder;
 
-        public TestController(IScmTokenHolder scmHolder)
+        public TestController(IJwtTokenHolder scmHolder)
         {
-            _ScmHolder = scmHolder;
+            _JwtHolder = scmHolder;
         }
 
         [HttpPost("Echo")]
         public ScmApiResponse PostEcho(ScmRequest request)
         {
-            var token = _ScmHolder.GetToken();
+            var token = _JwtHolder.GetToken();
             var response = new ScmApiDataResponse<long>();
             response.Data = token.terminal_id;
             response.SetSuccess();
@@ -29,7 +29,7 @@ namespace Com.Scm.Controllers
         [HttpPost("Mime")]
         public ScmApiResponse MimeAsync()
         {
-            var token = _ScmHolder.GetToken();
+            var token = _JwtHolder.GetToken();
             var response = new ScmApiDataResponse<long>();
             response.Data = token.terminal_id;
             response.SetSuccess();

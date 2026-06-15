@@ -6,8 +6,8 @@ namespace Com.Scm.Nas.Res
 {
     public class NasResDeviceService : NasResFileService
     {
-        public NasResDeviceService(SugarRepository<NasResFileDao> thisRepository, ISqlSugarClient sqlClient, IScmTokenHolder scmHolder, IResHolder resHolder)
-            : base(thisRepository, sqlClient, scmHolder, resHolder)
+        public NasResDeviceService(SugarRepository<NasResFileDao> thisRepository, ISqlSugarClient sqlClient, IJwtTokenHolder jwtHolder, IResHolder resHolder)
+            : base(thisRepository, sqlClient, jwtHolder, resHolder)
         {
         }
 

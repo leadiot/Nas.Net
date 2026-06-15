@@ -23,7 +23,7 @@ namespace Com.Scm.Nas.Sync
     [ApiExplorerSettings(GroupName = "Scm")]
     public class NasSyncService : AppService
     {
-        private IScmTokenHolder _ScmHolder;
+        private IJwtTokenHolder _JwtHolder;
 
         /// <summary>
         /// 构造函数
@@ -33,27 +33,30 @@ namespace Com.Scm.Nas.Sync
         /// <param name="resHolder"></param>
         public NasSyncService(ISqlSugarClient sqlClient,
             EnvConfig envConfig,
-            IScmTokenHolder scmHolder,
+            IJwtTokenHolder jwtHolder,
             IResHolder resHolder)
         {
             _SqlClient = sqlClient;
             _EnvConfig = envConfig;
-            _ScmHolder = scmHolder;
+            _JwtHolder = jwtHolder;
             _ResHolder = resHolder;
             //_MessageService = messageService;
         }
 
-        public SyncResult TestAsync()
+        public async Task<SyncResult> PostTestAsync(NasLogFileDto dto)
         {
-            var json = "{\"terminal_id\":0,\"folder_id\":2031909146500141056,\"res_id\":1773255166001,\"dir_id\":1773254941001,\"type\":10,\"kind\":0,\"name\":\"Devices\",\"path\":\"/Public/public/Devices\",\"hash\":\"\",\"size\":0,\"modify_time\":0,\"opt\":1,\"dir\":1,\"src\":null,\"row_status\":0,\"create_user\":0,\"create_names\":null,\"create_time\":1773284008749,\"update_user\":0,\"update_names\":null,\"update_time\":1773284008749,\"id\":0}";
-            var dto = json.AsJsonObject<NasLogFileDto>();
-            var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(2031718705003630592);
+            var token = _JwtHolder.GetToken();
+            var json = token.ToJsonString();
+            LogUtils.Info("PostTest", "TOKEN", json);
 
-            var result = new SyncResult();
+            var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
+            if (terminalDao == null)
+            {
+                LogUtils.Error("PostSync", "终端信息异常！");
+                return SyncResult.Failure("终端信息异常！");
+            }
 
-            DealDeleteFile(terminalDao, dto, result);
-
-            return result;
+            return SyncResult.Success();
         }
 
         #region 对外接口
@@ -63,7 +66,7 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<List<SyncResFileDao>> PostInitAsync()
         {
-            var token = _ScmHolder.GetToken();
+            var token = _JwtHolder.GetToken();
 
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
@@ -98,7 +101,7 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<ScmApiListResponse<NasCfgFolderDto>> GetFolderAsync()
         {
-            var token = _ScmHolder.GetToken();
+            var token = _JwtHolder.GetToken();
 
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
@@ -124,7 +127,7 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<NasCfgFolderDto> PostFolderAsync(NasCfgFolderDto dto)
         {
-            var token = _ScmHolder.GetToken();
+            var token = _JwtHolder.GetToken();
 
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
@@ -193,7 +196,7 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<ScmPageResultDto<NasLogFileDto>> GetLogAsync(GetLogRequest request)
         {
-            var token = _ScmHolder.GetToken();
+            var token = _JwtHolder.GetToken();
 
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
@@ -243,7 +246,7 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<ScmPageResultDto<NasResFileDto>> GetDirAsync(GetDirRequest request)
         {
-            var token = _ScmHolder.GetToken();
+            var token = _JwtHolder.GetToken();
 
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
@@ -277,7 +280,7 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<ScmPageResultDto<NasResFileDto>> GetDocAsync(GetDocRequest request)
         {
-            var token = _ScmHolder.GetToken();
+            var token = _JwtHolder.GetToken();
 
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
@@ -312,7 +315,7 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<ScmPageResultDto<NasResFileDto>> GetFileAsync(GetDocRequest request)
         {
-            var token = _ScmHolder.GetToken();
+            var token = _JwtHolder.GetToken();
 
             var terminalDao = _ResHolder.GetRes<ScmUrTerminalDao>(token.terminal_id);
             if (terminalDao == null || terminalDao.IsExpired())
@@ -348,7 +351,7 @@ namespace Com.Scm.Nas.Sync
         /// <returns></returns>
         public async Task<SyncResult> PostSyncAsync(NasLogFileDto dto)
         {
-            var token = _ScmHolder.GetToken();
+            var token = _JwtHolder.GetToken();
 
             if (dto == null)
             {

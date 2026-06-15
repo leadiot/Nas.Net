@@ -32,6 +32,8 @@
 	<ItemGroup>
 		<PackageReference Include="MailKit" Version="4.17.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.9" />
+		<PackageReference Include="MQTTnet" Version="5.1.0.1559" />
+		<PackageReference Include="MQTTnet.Server" Version="5.1.0.1559" />
 		<PackageReference Include="Quartz" Version="3.18.1" />
 		<PackageReference Include="Serilog" Version="4.3.1" />
 		<PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
@@ -94,6 +96,9 @@
 		<Reference Include="Scm.Generator">
 			<HintPath>..\..\Libs\net10.0\Scm.Generator.dll</HintPath>
 		</Reference>
+		<Reference Include="Scm.Mqtt">
+		  <HintPath>..\..\Libs\net10.0\Scm.Mqtt.dll</HintPath>
+		</Reference>
 		<Reference Include="Scm.Phone">
 			<HintPath>..\..\Libs\net10.0\Scm.Phone.dll</HintPath>
 		</Reference>
@@ -117,6 +122,9 @@
 		</Reference>
 		<Reference Include="Scm.Server.Dao">
 			<HintPath>..\..\Libs\net10.0\Scm.Server.Dao.dll</HintPath>
+		</Reference>
+		<Reference Include="Scm.Server.MQTT">
+		  <HintPath>..\..\Libs\net10.0\Scm.Server.MQTT.dll</HintPath>
 		</Reference>
 		<Reference Include="Scm.Server.Quartz">
 			<HintPath>..\..\Libs\net10.0\Scm.Server.Quartz.dll</HintPath>

@@ -18,7 +18,7 @@ namespace Com.Scm.Nas.Download
     {
         private static NasDownloadManager _Manager;
 
-        private readonly IScmTokenHolder _ScmHolder;
+        private readonly IJwtTokenHolder _JwtHolder;
         private readonly SugarRepository<NasDownloadDao> _thisRepository;
 
         /// <summary>
@@ -26,11 +26,11 @@ namespace Com.Scm.Nas.Download
         /// <param name="envConfig">环境配置</param>
         /// <param name="repository">下载任务仓储</param>
         /// <param name="maxConcurrent">最大并发任务数</param>
-        public NasDownloadService(SugarRepository<NasDownloadDao> repository, EnvConfig envConfig, IScmTokenHolder scmHolder)
+        public NasDownloadService(SugarRepository<NasDownloadDao> repository, EnvConfig envConfig, IJwtTokenHolder jwtHolder)
         {
             _thisRepository = repository;
             _EnvConfig = envConfig;
-            _ScmHolder = scmHolder;
+            _JwtHolder = jwtHolder;
 
             if (_Manager == null)
             {
@@ -92,7 +92,7 @@ namespace Com.Scm.Nas.Download
         /// </summary>
         public async Task<long> AddAsync(NasDownloadAddRequest request)
         {
-            var userCodes = _ScmHolder.GetToken().user_codes;
+            var userCodes = _JwtHolder.GetToken().user_codes;
 
             var linkType = NasDownloadManager.DetectLinkType(request.Url);
             if (linkType == NasDownloadLinkType.Unknown)

@@ -19,17 +19,17 @@ namespace Com.Scm.Nas.Res
     public class NasResFileService : ApiService
     {
         protected readonly SugarRepository<NasResFileDao> _thisRepository;
-        protected readonly IScmTokenHolder _jwtHolder;
+        protected readonly IJwtTokenHolder _jwtHolder;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="thisRepository"></param>
-        public NasResFileService(SugarRepository<NasResFileDao> thisRepository, ISqlSugarClient sqlClient, IScmTokenHolder scmHolder, IResHolder resHolder)
+        public NasResFileService(SugarRepository<NasResFileDao> thisRepository, ISqlSugarClient sqlClient, IJwtTokenHolder jwtHolder, IResHolder resHolder)
         {
             _thisRepository = thisRepository;
             _SqlClient = sqlClient;
-            _jwtHolder = scmHolder;
+            _jwtHolder = jwtHolder;
             _ResHolder = resHolder;
         }
 

@@ -1,2 +1,4 @@
+/* Ver:1 */
+
 INSERT INTO [scm_sys_menu]([id],[client],[types],[lang],[codec],[namec],[icon],[pid],[uri],[layer],[od],[visible],[enabled],[fullpage],[keepAlive],[active],[redirect],[view],[color],[layout],[width],[height],[resizable],[center],[showInDesktop],[showInTaskbar],[row_delete],[row_status],[create_time],[create_user],[update_time],[update_user]) VALUES (2062402823894732800,10,1,'zh-cn','app-nas','云空间','ms-cloud',2055888578361298944,'/nas',1,2,1,1,0,1,NULL,NULL,'Nas',NULL,2,0,0,1,0,1,0,1,1,1780550125465,1000000000000001030,1780550164083,1000000000000001030);
 INSERT INTO [scm_ur_role_auth]([role_id],[od],[auth_id],[api],[types],[row_status],[create_time],[create_user],[update_time],[update_user]) VALUES (1000000000000001030,0,2062402823894732800,'[]',1,1,1779098813962,1000000000000001030,1779098813962,1000000000000001030);

@@ -7,18 +7,22 @@ namespace Com.Scm.Nas.Log
 {
     /// <summary>
     /// 同步日志
+    /// 同一个文件在同一时间可能会有多条日志记录，记录不同的操作类型
+    /// 同一个文件在不同时间也可能会有多条日志记录，记录不同的操作类型
+    /// 同一个操作日志可能会有多个目录侦听，需要针对不同的目录记录不同的操作日志，
+    /// 此处的terminal_id和folder_id是指操作日志的来源终端和来源目录观察
     /// </summary>
     [SugarTable("nas_log_file")]
     public class NasLogFileDao : ScmUserDataDao
     {
         /// <summary>
-        /// 终端ID
+        /// 终端ID（来源终端）
         /// </summary>
         [Required]
         public long terminal_id { get; set; }
 
         /// <summary>
-        /// 驱动ID
+        /// 驱动ID（来源目录）
         /// </summary>
         [Required]
         public long folder_id { get; set; }

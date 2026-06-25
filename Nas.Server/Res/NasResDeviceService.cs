@@ -1,4 +1,5 @@
 ﻿using Com.Scm.Dsa;
+using Com.Scm.Mqtt;
 using Com.Scm.Token;
 using SqlSugar;
 
@@ -6,8 +7,12 @@ namespace Com.Scm.Nas.Res
 {
     public class NasResDeviceService : NasResFileService
     {
-        public NasResDeviceService(SugarRepository<NasResFileDao> thisRepository, ISqlSugarClient sqlClient, IJwtTokenHolder jwtHolder, IResHolder resHolder)
-            : base(thisRepository, sqlClient, jwtHolder, resHolder)
+        public NasResDeviceService(SugarRepository<NasResFileDao> thisRepository,
+            ISqlSugarClient sqlClient,
+            IJwtTokenHolder jwtHolder,
+            IResHolder resHolder,
+            IMqttPublisher publisher)
+            : base(thisRepository, sqlClient, jwtHolder, resHolder, publisher)
         {
         }
 

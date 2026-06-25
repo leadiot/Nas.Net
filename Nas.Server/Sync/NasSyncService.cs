@@ -2,6 +2,7 @@
 using Com.Scm.Dto;
 using Com.Scm.Enums;
 using Com.Scm.Filters;
+using Com.Scm.Mqtt;
 using Com.Scm.Nas.Cfg;
 using Com.Scm.Nas.Log;
 using Com.Scm.Nas.Res;
@@ -24,6 +25,7 @@ namespace Com.Scm.Nas.Sync
     public class NasSyncService : AppService
     {
         private IJwtTokenHolder _JwtHolder;
+        private readonly IMqttPublisher _Publisher;
 
         /// <summary>
         /// 构造函数
@@ -34,12 +36,14 @@ namespace Com.Scm.Nas.Sync
         public NasSyncService(ISqlSugarClient sqlClient,
             EnvConfig envConfig,
             IJwtTokenHolder jwtHolder,
-            IResHolder resHolder)
+            IResHolder resHolder,
+            IMqttPublisher publisher)
         {
             _SqlClient = sqlClient;
             _EnvConfig = envConfig;
             _JwtHolder = jwtHolder;
             _ResHolder = resHolder;
+            _Publisher = publisher;
             //_MessageService = messageService;
         }
 
@@ -1857,7 +1861,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="token"></param>
         /// <param name="logDto"></param>
         /// <returns></returns>
-        private void AddLogFileByDto(ScmUrTerminalDao token, NasLogFileDto logDto, long resId, long dirId, List<SyncResFileDao> parentList)
+        private async Task AddLogFileByDto(ScmUrTerminalDao token, NasLogFileDto logDto, long resId, long dirId, List<SyncResFileDao> parentList)
         {
             var logDao = logDto.Adapt<Sync.SyncLogFileDao>();
             logDao.user_id = token.user_id;
@@ -1896,7 +1900,40 @@ namespace Com.Scm.Nas.Sync
                 tmpDao.log_id = logDao.id;
                 tmpDao.PrepareCreate(token.user_id);
                 _SqlClient.Insertable(tmpDao).ExecuteCommand();
+
+                await PulishToMqttAsync(token, tmpDao, logDao);
             }
+        }
+
+        /// <summary>
+        /// 发布到Mqtt
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="folderDao"></param>
+        /// <param name="fileDao"></param>
+        /// <returns></returns>
+        private async Task PulishToMqttAsync(ScmUrTerminalDao token, SyncLogFolderDao folderDao, SyncLogFileDao fileDao)
+        {
+            var dto = new NasLogFileDto
+            {
+                id = folderDao.id,
+                terminal_id = fileDao.terminal_id,
+                folder_id = fileDao.folder_id,
+                res_id = fileDao.res_id,
+                dir_id = fileDao.dir_id,
+                type = fileDao.type,
+                name = fileDao.name,
+                path = fileDao.path,
+                hash = fileDao.hash,
+                size = fileDao.size,
+                modify_time = fileDao.modify_time,
+                opt = fileDao.opt,
+                dir = fileDao.dir,
+                src = fileDao.src
+            };
+            var json = dto.ToJsonString();
+            var topic = $"nas/{token.id}/folder";
+            await _Publisher.PublishAsync(topic, json, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce);
         }
 
         private SyncCfgFolderDao GetCfgFolderDaoById(long folderId)

@@ -3,9 +3,13 @@ using Com.Scm.Dto;
 using Com.Scm.Dvo;
 using Com.Scm.Enums;
 using Com.Scm.Exceptions;
+using Com.Scm.Mqtt;
+using Com.Scm.Nas.Cfg;
+using Com.Scm.Nas.Log;
 using Com.Scm.Nas.Res.Dvo;
 using Com.Scm.Service;
 using Com.Scm.Token;
+using Com.Scm.Ur;
 using Com.Scm.Utils;
 using Microsoft.AspNetCore.Mvc;
 using SqlSugar;
@@ -20,17 +24,23 @@ namespace Com.Scm.Nas.Res
     {
         protected readonly SugarRepository<NasResFileDao> _thisRepository;
         protected readonly IJwtTokenHolder _jwtHolder;
+        protected readonly IMqttPublisher _Publisher;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="thisRepository"></param>
-        public NasResFileService(SugarRepository<NasResFileDao> thisRepository, ISqlSugarClient sqlClient, IJwtTokenHolder jwtHolder, IResHolder resHolder)
+        public NasResFileService(SugarRepository<NasResFileDao> thisRepository,
+            ISqlSugarClient sqlClient,
+            IJwtTokenHolder jwtHolder,
+            IResHolder resHolder,
+            IMqttPublisher publisher)
         {
             _thisRepository = thisRepository;
             _SqlClient = sqlClient;
             _jwtHolder = jwtHolder;
             _ResHolder = resHolder;
+            _Publisher = publisher;
         }
 
         /// <summary>
@@ -184,8 +194,7 @@ namespace Com.Scm.Nas.Res
 
             var result = await _thisRepository.InsertAsync(dao);
 
-            var manager = new NasManager(_SqlClient);
-            manager.AddCreateLog(dao, parentDao.user_id);
+            await AddCreateLog(dao, parentDao.user_id);
 
             return result;
         }
@@ -222,8 +231,7 @@ namespace Com.Scm.Nas.Res
             dao.path = NasUtils.CombinePath(parentPath, model.name);
             var result = await _thisRepository.UpdateAsync(dao);
 
-            var manager = new NasManager(_SqlClient);
-            manager.AddRenameLog(dao, parentDao.user_id, src);
+            await AddRenameLog(dao, parentDao.user_id, src);
 
             return result;
         }
@@ -250,10 +258,126 @@ namespace Com.Scm.Nas.Res
 
             var idList = ids.ToListLong();
             var daoList = await _thisRepository.GetListAsync(a => idList.Contains(a.id));
-            var manager = new NasManager(_SqlClient);
-            manager.AddDeleteLog(daoList, token.user_id);
+            await AddDeleteLog(daoList, token.user_id);
 
             return await DeleteRecord(_thisRepository, ids.ToListLong());
         }
+
+        #region 文件操作
+        /// <summary>
+        /// 创建事件
+        /// </summary>
+        /// <param name="dao"></param>
+        public async Task AddCreateLog(NasResFileDao dao, long userId)
+        {
+            var manager = new NasManager(_SqlClient);
+            var logDao = manager.AddLogFileDao(dao, ScmEnv.DEFAULT_ID, ScmEnv.DEFAULT_ID, NasOptEnums.Create);
+            var folderList = manager.ListFolderDao(userId);
+            await AddFolderLog(manager, folderList, logDao, dao);
+        }
+
+        /// <summary>
+        /// 更名事件
+        /// </summary>
+        /// <param name="dao"></param>
+        /// <param name="userId"></param>
+        /// <param name="src"></param>
+        public async Task AddRenameLog(NasResFileDao dao, long userId, string src)
+        {
+            var manager = new NasManager(_SqlClient);
+            var logDao = manager.AddLogFileDao(dao, ScmEnv.DEFAULT_ID, ScmEnv.DEFAULT_ID, NasOptEnums.Rename, src);
+            var folderList = manager.ListFolderDao(userId);
+            await AddFolderLog(manager, folderList, logDao, dao);
+        }
+
+        /// <summary>
+        /// 删除事件
+        /// </summary>
+        /// <param name="dao"></param>
+        /// <param name="userId"></param>
+        public async Task AddDeleteLog(NasResFileDao dao, long userId)
+        {
+            var manager = new NasManager(_SqlClient);
+            var logDao = manager.AddLogFileDao(dao, ScmEnv.DEFAULT_ID, ScmEnv.DEFAULT_ID, NasOptEnums.Delete);
+            var folderList = manager.ListFolderDao(userId);
+            await AddFolderLog(manager, folderList, logDao, dao);
+        }
+
+        /// <summary>
+        /// 删除事件
+        /// </summary>
+        /// <param name="daoList"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task AddDeleteLog(List<NasResFileDao> daoList, long userId)
+        {
+            var manager = new NasManager(_SqlClient);
+            var folderList = manager.ListFolderDao(userId);
+            foreach (var dao in daoList)
+            {
+                var logDao = manager.AddLogFileDao(dao, ScmEnv.DEFAULT_ID, ScmEnv.DEFAULT_ID, NasOptEnums.Delete);
+                await AddFolderLog(manager, folderList, logDao, dao);
+            }
+        }
+
+        /// <summary>
+        /// 以文件夹为单位，添加日志
+        /// </summary>
+        /// <param name="manager"></param>
+        /// <param name="folderList"></param>
+        /// <param name="logDao"></param>
+        /// <param name="resDao"></param>
+        /// <returns></returns>
+        private async Task AddFolderLog(NasManager manager, List<NasCfgFolderDao> folderList, NasLogFileDao logDao, NasResFileDao resDao)
+        {
+            var parentList = manager.ListParentDao(resDao);
+
+            foreach (var folderDao in folderList)
+            {
+                foreach (var fileDao in parentList)
+                {
+                    if (folderDao.res_id != fileDao.id)
+                    {
+                        continue;
+                    }
+
+                    var logFolderDao = manager.AddLogFolderDao(logDao, folderDao.id);
+                    await PulishToMqttAsync(folderDao.terminal_id, logFolderDao, logDao);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 发布到Mqtt
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="folderDao"></param>
+        /// <param name="fileDao"></param>
+        /// <returns></returns>
+        private async Task PulishToMqttAsync(long terminalId, NasLogFolderDao folderDao, NasLogFileDao fileDao)
+        {
+            var dto = new NasLogFileDto
+            {
+                id = folderDao.id,
+                terminal_id = fileDao.terminal_id,
+                folder_id = fileDao.folder_id,
+                res_id = fileDao.res_id,
+                dir_id = fileDao.dir_id,
+                type = fileDao.type,
+                name = fileDao.name,
+                path = fileDao.path,
+                hash = fileDao.hash,
+                size = fileDao.size,
+                modify_time = fileDao.modify_time,
+                opt = fileDao.opt,
+                dir = fileDao.dir,
+                src = fileDao.src
+            };
+            var json = dto.ToJsonString();
+            var topic = $"nas/{terminalId}/folder";
+            await _Publisher.PublishAsync(topic, json, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce);
+        }
+
+        #endregion
     }
 }

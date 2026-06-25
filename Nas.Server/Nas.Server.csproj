@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.11" />
     <PackageReference Include="MiniExcel" Version="1.44.1" />
+    <PackageReference Include="MQTTnet" Version="5.1.0.1559" />
     <PackageReference Include="SqlSugarCore" Version="5.1.4.214" />
   </ItemGroup>
 
@@ -46,6 +47,9 @@
     </Reference>
     <Reference Include="Scm.Dsa.Dba.Sugar">
       <HintPath>..\..\Libs\net10.0\Scm.Dsa.Dba.Sugar.dll</HintPath>
+    </Reference>
+    <Reference Include="Scm.Mqtt">
+      <HintPath>..\..\Libs\net10.0\Scm.Mqtt.dll</HintPath>
     </Reference>
     <Reference Include="Scm.Server">
       <HintPath>..\..\Libs\net10.0\Scm.Server.dll</HintPath>

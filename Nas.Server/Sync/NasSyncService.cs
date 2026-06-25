@@ -12,6 +12,7 @@ using Com.Scm.Service;
 using Com.Scm.Token;
 using Com.Scm.Ur;
 using Com.Scm.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SqlSugar;
 
@@ -346,6 +347,7 @@ namespace Com.Scm.Nas.Sync
             return response;
         }
 
+        [AllowAnonymous]
         /// <summary>
         /// 上传同步日志
         /// </summary>
@@ -465,6 +467,7 @@ namespace Com.Scm.Nas.Sync
 
         /// <summary>
         /// 删除文档
+        /// 如果没有数据记录，则不做任何操作，仅删除有数据记录的目录
         /// </summary>
         /// <param name="dto"></param>
         /// <param name="result"></param>
@@ -484,27 +487,27 @@ namespace Com.Scm.Nas.Sync
             var parentDao = GetDirDaoByPath(token, NasUtils.GetParentPath(dto.path), parentList);
             var docDao = GetDocDaoByPath(token.user_id, dto.path);
 
-            var dstFile = GetNativePath(token, dto.path);
-            var isDelete = false;
-            if (folderDao.dss == NasDssEnum.Remove)
-            {
-                isDelete = true;
-                var trashPath = GetTrashPath(token, docDao);
-                FileUtils.MoveDoc(dstFile, trashPath, true);
-                LogUtils.Debug(TAG_DELETE_FILE, $"逻辑删除文档：{dstFile} -> {trashPath}");
-            }
-            else if (folderDao.dss == NasDssEnum.Delete)
-            {
-                isDelete = true;
-                FileUtils.DeleteDoc(dstFile);
-                LogUtils.Debug(TAG_DELETE_FILE, $"物理删除文档：{dstFile}");
-            }
-
             var resId = 0L;
             var ver = 0L;
             var dirId = 0L;
             if (docDao != null)
             {
+                var dstFile = GetNativePath(token, dto.path);
+                var isDelete = false;
+                if (folderDao.dss == NasDssEnum.Remove)
+                {
+                    isDelete = true;
+                    var trashPath = GetTrashPath(token, docDao);
+                    FileUtils.MoveDoc(dstFile, trashPath, true);
+                    LogUtils.Debug(TAG_DELETE_FILE, $"逻辑删除文档：{dstFile} -> {trashPath}");
+                }
+                else if (folderDao.dss == NasDssEnum.Delete)
+                {
+                    isDelete = true;
+                    FileUtils.DeleteDoc(dstFile);
+                    LogUtils.Debug(TAG_DELETE_FILE, $"物理删除文档：{dstFile}");
+                }
+
                 DealDeleteDocDao(docDao, isDelete);
                 resId = docDao.id;
                 ver = docDao.ver;
@@ -549,6 +552,7 @@ namespace Com.Scm.Nas.Sync
 
         /// <summary>
         /// 删除目录
+        /// 如果没有数据记录，则不做任何操作，仅删除有数据记录的目录
         /// </summary>
         /// <param name="dto"></param>
         /// <param name="result"></param>
@@ -567,27 +571,27 @@ namespace Com.Scm.Nas.Sync
             var parentList = new List<SyncResFileDao>();
             var dirDao = GetDirDaoByPath(token, dto.path, parentList);
 
-            var dstFile = GetNativePath(token, dto.path);
-            var isDelete = false;
-            if (folderDao.dss == NasDssEnum.Remove)
-            {
-                isDelete = false;
-                var trashPath = GetTrashPath(token, dirDao);
-                FileUtils.MoveDoc(dstFile, trashPath, true);
-                LogUtils.Debug(TAG_DELETE_FILE, $"逻辑删除目录：{dstFile} -> {trashPath}");
-            }
-            else if (folderDao.dss == NasDssEnum.Delete)
-            {
-                isDelete = true;
-                FileUtils.DeleteDir(dstFile);
-                LogUtils.Debug(TAG_DELETE_FILE, $"物理删除目录：{dstFile}");
-            }
-
             var resId = 0L;
             var dirId = 0L;
             var ver = 0L;
             if (dirDao != null)
             {
+                var dstFile = GetNativePath(token, dto.path);
+                var isDelete = false;
+                if (folderDao.dss == NasDssEnum.Remove)
+                {
+                    isDelete = false;
+                    var trashPath = GetTrashPath(token, dirDao);
+                    FileUtils.MoveDoc(dstFile, trashPath, true);
+                    LogUtils.Debug(TAG_DELETE_FILE, $"逻辑删除目录：{dstFile} -> {trashPath}");
+                }
+                else if (folderDao.dss == NasDssEnum.Delete)
+                {
+                    isDelete = true;
+                    FileUtils.DeleteDir(dstFile);
+                    LogUtils.Debug(TAG_DELETE_FILE, $"物理删除目录：{dstFile}");
+                }
+
                 DealDeleteDirDao(dirDao, isDelete);
 
                 resId = dirDao.id;
@@ -1626,10 +1630,10 @@ namespace Com.Scm.Nas.Sync
             var userDao = _ResHolder.GetRes<UserDao>(token.user_id);
             if (userDao == null)
             {
-                return GetNasPath($"/{dao.id}" + FileUtils.GetExtension(dao.name));
+                return GetNasPath($"/Trash/{dao.id}" + FileUtils.GetExtension(dao.name));
             }
 
-            return GetNasPath($"/{userDao.codes}/{dao.id}" + FileUtils.GetExtension(dao.name));
+            return GetNasPath($"/Trash/{userDao.codes}/{dao.id}" + FileUtils.GetExtension(dao.name));
         }
 
         private string GetNasPath(string path)
@@ -1861,7 +1865,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="token"></param>
         /// <param name="logDto"></param>
         /// <returns></returns>
-        private async Task AddLogFileByDto(ScmUrTerminalDao token, NasLogFileDto logDto, long resId, long dirId, List<SyncResFileDao> parentList)
+        private void AddLogFileByDto(ScmUrTerminalDao token, NasLogFileDto logDto, long resId, long dirId, List<SyncResFileDao> parentList)
         {
             var logDao = logDto.Adapt<Sync.SyncLogFileDao>();
             logDao.user_id = token.user_id;
@@ -1901,7 +1905,7 @@ namespace Com.Scm.Nas.Sync
                 tmpDao.PrepareCreate(token.user_id);
                 _SqlClient.Insertable(tmpDao).ExecuteCommand();
 
-                await PulishToMqttAsync(token, tmpDao, logDao);
+                _ = PulishToMqttAsync(token, tmpDao, logDao);
             }
         }
 
@@ -1938,6 +1942,8 @@ namespace Com.Scm.Nas.Sync
             {
                 await _Publisher.ConnectAsync();
             }
+
+            LogUtils.Info("PulishToMqttAsync", $"发布到Mqtt: {topic} -> {json}");
 
             await _Publisher.PublishAsync(topic, json, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce);
         }

@@ -90,7 +90,7 @@ namespace Com.Scm.Nas.Helper
             // 配置管理
             var nasCfgDao = CreateMenu(2000099923089234567, "nas-cfg", "配置管理", nasDao.id, 2, 1, "/nas/cfg", "nas/cfg", "sc-settings-line");
             roleAdminList.Add(new RoleAuthDao { role_id = roleId, auth_id = nasCfgDao.id, types = ScmRoleAuthTypesEnum.RoleMenu });
-            var nasCfgFolderDao = CreateMenu(2000099923089526478, "nas-cfg-folder", "驱动管理", nasCfgDao.id, 2, 1, "/nas/cfg/folder", "nas/cfg/folder", "");
+            var nasCfgFolderDao = CreateMenu(2000099923089526478, "nas-cfg-folder", "同步管理", nasCfgDao.id, 2, 1, "/nas/cfg/folder", "nas/cfg/folder", "");
             roleAdminList.Add(new RoleAuthDao { role_id = roleId, auth_id = nasCfgFolderDao.id, types = ScmRoleAuthTypesEnum.RoleMenu });
 
             // 日志管理

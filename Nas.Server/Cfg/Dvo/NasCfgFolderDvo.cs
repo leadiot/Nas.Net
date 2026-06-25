@@ -15,6 +15,11 @@ namespace Com.Scm.Nas.Cfg.Dvo
         /// <summary>
         /// 
         /// </summary>
+        public string terminal_name { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public string name { get; set; }
 
         /// <summary>

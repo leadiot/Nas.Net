@@ -4,6 +4,7 @@ using Com.Scm.Enums;
 using Com.Scm.Exceptions;
 using Com.Scm.Nas.Cfg.Dvo;
 using Com.Scm.Service;
+using Com.Scm.Ur;
 using Com.Scm.Utils;
 using Microsoft.AspNetCore.Mvc;
 
@@ -62,6 +63,16 @@ namespace Com.Scm.Nas.Cfg
 
             Prepare(result);
             return result;
+        }
+
+        private void Prepare(List<NasCfgFolderDvo> list)
+        {
+            foreach (var item in list)
+            {
+                item.terminal_name = _ResHolder.GetResNames<ScmUrTerminalDao>(item.terminal_id);
+                item.update_names = _ResHolder.GetResNames<UserDao>(item.update_user);
+                item.create_names = _ResHolder.GetResNames<UserDao>(item.create_user);
+            }
         }
 
         /// <summary>

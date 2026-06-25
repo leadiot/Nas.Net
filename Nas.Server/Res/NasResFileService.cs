@@ -9,7 +9,6 @@ using Com.Scm.Nas.Log;
 using Com.Scm.Nas.Res.Dvo;
 using Com.Scm.Service;
 using Com.Scm.Token;
-using Com.Scm.Ur;
 using Com.Scm.Utils;
 using Microsoft.AspNetCore.Mvc;
 using SqlSugar;
@@ -375,6 +374,11 @@ namespace Com.Scm.Nas.Res
             };
             var json = dto.ToJsonString();
             var topic = $"nas/{terminalId}/folder";
+
+            if (!_Publisher.IsConnected)
+            {
+                await _Publisher.ConnectAsync();
+            }
             await _Publisher.PublishAsync(topic, json, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce);
         }
 

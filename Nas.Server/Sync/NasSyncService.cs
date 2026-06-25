@@ -1933,6 +1933,12 @@ namespace Com.Scm.Nas.Sync
             };
             var json = dto.ToJsonString();
             var topic = $"nas/{token.id}/folder";
+
+            if (!_Publisher.IsConnected)
+            {
+                await _Publisher.ConnectAsync();
+            }
+
             await _Publisher.PublishAsync(topic, json, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce);
         }
 

@@ -12,7 +12,6 @@ using Com.Scm.Service;
 using Com.Scm.Token;
 using Com.Scm.Ur;
 using Com.Scm.Utils;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SqlSugar;
 
@@ -347,7 +346,6 @@ namespace Com.Scm.Nas.Sync
             return response;
         }
 
-        [AllowAnonymous]
         /// <summary>
         /// 上传同步日志
         /// </summary>

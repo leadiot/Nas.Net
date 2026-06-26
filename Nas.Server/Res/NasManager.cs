@@ -60,10 +60,11 @@ namespace Com.Scm.Nas.Res
             return logDao;
         }
 
-        public NasLogFolderDao AddLogFolderDao(NasLogFileDao logDao, long folderId)
+        public NasLogFolderDao AddLogFolderDao(NasLogFileDao logDao, long terminalId, long folderId)
         {
             var folderDao = new NasLogFolderDao();
             folderDao.user_id = logDao.user_id;
+            folderDao.terminal_id = terminalId;
             folderDao.folder_id = folderId;
             folderDao.log_id = logDao.id;
             _SqlClient.Insertable(folderDao).ExecuteCommand();

@@ -8,6 +8,9 @@ namespace Com.Scm.Nas.Log
     public class NasLogFolderDao : ScmUserDataDao
     {
         [Required]
+        public long terminal_id { get; set; }
+
+        [Required]
         public long folder_id { get; set; }
 
         [Required]

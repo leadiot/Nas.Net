@@ -333,16 +333,15 @@ namespace Com.Scm.Nas.Res
 
             foreach (var folderDao in folderList)
             {
-                foreach (var fileDao in parentList)
+                // 匹配不到父级目录
+                var parent = parentList.Find(a => a.id == folderDao.res_id);
+                if (parent == null)
                 {
-                    if (folderDao.res_id != fileDao.id)
-                    {
-                        continue;
-                    }
-
-                    var logFolderDao = manager.AddLogFolderDao(logDao, folderDao.id);
-                    await PulishToMqttAsync(folderDao.terminal_id, logFolderDao, logDao);
+                    continue;
                 }
+
+                var logFolderDao = manager.AddLogFolderDao(logDao, folderDao.terminal_id, folderDao.id);
+                await PulishToMqttAsync(logFolderDao, logDao);
             }
         }
 
@@ -353,7 +352,7 @@ namespace Com.Scm.Nas.Res
         /// <param name="folderDao"></param>
         /// <param name="fileDao"></param>
         /// <returns></returns>
-        private async Task PulishToMqttAsync(long terminalId, NasLogFolderDao folderDao, NasLogFileDao fileDao)
+        private async Task PulishToMqttAsync(NasLogFolderDao folderDao, NasLogFileDao fileDao)
         {
             var dto = new NasLogFileDto
             {
@@ -373,7 +372,7 @@ namespace Com.Scm.Nas.Res
                 src = fileDao.src
             };
             var json = dto.ToJsonString();
-            var topic = $"nas/{terminalId}/folder";
+            var topic = $"nas/{folderDao.terminal_id}/folder";
 
             if (!_Publisher.IsConnected)
             {

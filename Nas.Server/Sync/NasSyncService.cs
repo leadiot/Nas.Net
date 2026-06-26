@@ -12,6 +12,7 @@ using Com.Scm.Service;
 using Com.Scm.Token;
 using Com.Scm.Ur;
 using Com.Scm.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SqlSugar;
 
@@ -346,6 +347,7 @@ namespace Com.Scm.Nas.Sync
             return response;
         }
 
+        [AllowAnonymous]
         /// <summary>
         /// 上传同步日志
         /// </summary>
@@ -1890,6 +1892,7 @@ namespace Com.Scm.Nas.Sync
                     continue;
                 }
 
+                // 匹配不到父级目录
                 var parent = parentList.Find(a => a.id == folder.res_id);
                 if (parent == null)
                 {
@@ -1898,12 +1901,13 @@ namespace Com.Scm.Nas.Sync
 
                 var tmpDao = new SyncLogFolderDao();
                 tmpDao.user_id = token.user_id;
+                tmpDao.terminal_id = folder.terminal_id;
                 tmpDao.folder_id = folder.id;
                 tmpDao.log_id = logDao.id;
                 tmpDao.PrepareCreate(token.user_id);
                 _SqlClient.Insertable(tmpDao).ExecuteCommand();
 
-                _ = PulishToMqttAsync(token, tmpDao, logDao);
+                _ = PulishToMqttAsync(tmpDao, logDao);
             }
         }
 
@@ -1914,7 +1918,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="folderDao"></param>
         /// <param name="fileDao"></param>
         /// <returns></returns>
-        private async Task PulishToMqttAsync(ScmUrTerminalDao token, SyncLogFolderDao folderDao, SyncLogFileDao fileDao)
+        private async Task PulishToMqttAsync(SyncLogFolderDao folderDao, SyncLogFileDao fileDao)
         {
             var dto = new NasLogFileDto
             {
@@ -1934,7 +1938,7 @@ namespace Com.Scm.Nas.Sync
                 src = fileDao.src
             };
             var json = dto.ToJsonString();
-            var topic = $"nas/{token.id}/folder";
+            var topic = $"nas/{folderDao.terminal_id}/folder";
 
             if (!_Publisher.IsConnected)
             {
@@ -1942,7 +1946,6 @@ namespace Com.Scm.Nas.Sync
             }
 
             LogUtils.Info("PulishToMqttAsync", $"发布到Mqtt: {topic} -> {json}");
-
             await _Publisher.PublishAsync(topic, json, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce);
         }
 

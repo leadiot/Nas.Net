@@ -91,7 +91,8 @@ namespace Com.Scm.Nas.Res
                 .WhereIF(request.opt == Dvo.SearchOption.ByKind, a => a.kind == request.kind)
                 //.WhereIF(IsNormalId(request.folder_id), a => a.folder_id == request.folder_id)
                 .WhereIF(!string.IsNullOrEmpty(request.key), a => a.name.Contains(request.key))
-                .OrderBy(m => m.id)
+                .OrderBy(a => a.type, OrderByType.Asc)
+                .OrderBy(a => a.name, OrderByType.Asc)
                 .Select<NasResFileDvo>()
                 .ToListAsync();
 

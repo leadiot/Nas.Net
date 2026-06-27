@@ -1401,6 +1401,7 @@ namespace Com.Scm.Nas.Sync
             else
             {
                 docDao.hash = dto.hash;
+                docDao.modify_time = dto.modify_time;
                 docDao.size = dto.size;
                 docDao.dir_id = parentDao.id;
                 UpdateResFileDao(token, docDao);

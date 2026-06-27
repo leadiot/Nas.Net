@@ -9,7 +9,7 @@ internal class Program
 
     private static void GetBasicToken()
     {
-        var terminalId = 2070054913395789824L;
+        var terminalId = 2070757555625398272L;
         var userId = 1000000000000001030;
         var accessToken = "";
 

@@ -1508,6 +1508,7 @@ namespace Com.Scm.Nas.Sync
             dao.path = path;
             dao.kind = ScmFileKindEnum.None;
             dao.dir_id = dirId;
+            dao.modify_time = TimeUtils.GetUnixTime(true);
             dao.PrepareUpdate(token.user_id);
             _SqlClient.Updateable(dao).ExecuteCommand();
             return dao;
@@ -1768,6 +1769,7 @@ namespace Com.Scm.Nas.Sync
                 type = ScmFileTypeEnum.Dir,
                 name = name,
                 path = path,
+                modify_time = TimeUtils.GetUnixTime(true),
                 dir_id = dirId, // 根目录
             };
             dao.PrepareCreate(token.user_id);

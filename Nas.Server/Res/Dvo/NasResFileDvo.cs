@@ -1,5 +1,6 @@
 using Com.Scm.Dvo;
 using Com.Scm.Enums;
+using Com.Scm.Utils;
 
 namespace Com.Scm.Nas.Res.Dvo
 {
@@ -42,6 +43,13 @@ namespace Com.Scm.Nas.Res.Dvo
         /// 文档大小
         /// </summary>
         public long size { get; set; }
+
+        /// <summary>
+        /// 更新时间
+        /// </summary>
+        public long modify_time { get; set; }
+
+        public string modify_times { get { return TimeUtils.FormatTime(modify_time); } }
 
         /// <summary>
         /// 文档摘要

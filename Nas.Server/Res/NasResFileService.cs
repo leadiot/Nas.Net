@@ -59,8 +59,8 @@ namespace Com.Scm.Nas.Res
                 .WhereIF(!request.IsAllStatus(), a => a.row_status == request.row_status)
                 //.WhereIF(IsValidId(request.option_id), a => a.option_id == request.option_id)
                 .WhereIF(!string.IsNullOrEmpty(request.key), a => a.name.Contains(request.key))
-                .OrderBy(a => a.type)
-                .OrderBy(m => m.id)
+                .OrderBy(a => a.type, OrderByType.Asc)
+                .OrderBy(a => a.name, OrderByType.Asc)
                 .Select<NasResFileDvo>()
                 .ToPageAsyncV2(request.page, request.limit);
 

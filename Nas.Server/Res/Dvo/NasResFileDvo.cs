@@ -49,7 +49,7 @@ namespace Com.Scm.Nas.Res.Dvo
         /// </summary>
         public long modify_time { get; set; }
 
-        public string modify_times { get { return TimeUtils.FormatTime(modify_time); } }
+        public string modify_times { get { return TimeUtils.FormatDataTime(modify_time); } }
 
         /// <summary>
         /// 文档摘要

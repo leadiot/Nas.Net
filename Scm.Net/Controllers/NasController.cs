@@ -56,7 +56,7 @@ namespace Com.Scm.Controllers
                 .FirstAsync();
             if (docDao == null)
             {
-                throw new BusinessException("文件不存在！");
+                throw new BusinessException("记录不存在！");
             }
 
             var userDao = await _SqlClient.Queryable<UserDao>()
@@ -64,7 +64,7 @@ namespace Com.Scm.Controllers
                 .FirstAsync();
             if (userDao == null)
             {
-                throw new BusinessException("文件不存在！");
+                throw new BusinessException("用户不存在！");
             }
 
             // 1. 定义文件存储的根路径

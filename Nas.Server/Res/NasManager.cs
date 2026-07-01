@@ -23,7 +23,7 @@ namespace Com.Scm.Nas.Res
         public List<NasResFileDao> ListParentDao(NasResFileDao dao)
         {
             var list = new List<NasResFileDao>();
-            while (dao.dir_id != NasEnv.DEF_DIR_ID)
+            while (dao.dir_id != NasEnv.DEF_SERVER_DIR_ID)
             {
                 dao = GetDaoById(dao.dir_id);
                 list.Add(dao);

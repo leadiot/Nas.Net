@@ -96,6 +96,8 @@ namespace Com.Scm.Nas.Sync
             dirList.Add(dao);
             dao = CreateSpecialDirDao(terminalDao, NasEnv.NodeApps, NasEnv.PathApps, ScmFileKindEnum.Folder);
             dirList.Add(dao);
+            dao = CreateSpecialDirDao(terminalDao, NasEnv.NodeTrash, NasEnv.PathTrash, ScmFileKindEnum.Folder);
+            dirList.Add(dao);
 
             return dirList;
         }
@@ -1554,13 +1556,13 @@ namespace Com.Scm.Nas.Sync
         {
             if (string.IsNullOrEmpty(path))
             {
-                return NasEnv.DEF_DIR_ID;
+                return NasEnv.DEF_SERVER_DIR_ID;
             }
 
             path = path.TrimEnd(NasEnv.WebSeparator);
             if (string.IsNullOrEmpty(path))
             {
-                return NasEnv.DEF_DIR_ID;
+                return NasEnv.DEF_SERVER_DIR_ID;
             }
 
             var index = path.LastIndexOf(NasEnv.WebSeparator);
@@ -1570,7 +1572,7 @@ namespace Com.Scm.Nas.Sync
             }
 
             var dirDao = GetDirDaoByPath(userId, path);
-            return dirDao != null ? dirDao.id : NasEnv.DEF_DIR_ID;
+            return dirDao != null ? dirDao.id : NasEnv.DEF_SERVER_DIR_ID;
         }
 
         /// <summary>
@@ -1665,7 +1667,7 @@ namespace Com.Scm.Nas.Sync
                 dao.kind = kind;
                 dao.name = name;
                 dao.path = path;
-                dao.dir_id = NasEnv.DEF_DIR_ID;
+                dao.dir_id = NasEnv.DEF_SERVER_DIR_ID;
                 dao.PrepareCreate(token.user_id);
                 _SqlClient.Insertable(dao).ExecuteCommand();
             }
@@ -1685,7 +1687,7 @@ namespace Com.Scm.Nas.Sync
         {
             LogUtils.Debug("CreateRecursiveDirDao:" + path);
 
-            SyncResFileDao parentDao = new SyncResFileDao { id = NasEnv.DEF_DIR_ID };
+            SyncResFileDao parentDao = new SyncResFileDao { id = NasEnv.DEF_SERVER_DIR_ID };
 
             var tmp = "";
             path = path.Trim(NasEnv.WebSeparator);
@@ -1722,7 +1724,7 @@ namespace Com.Scm.Nas.Sync
         {
             LogUtils.Debug("GetDirDaoByPath:" + path);
 
-            SyncResFileDao parentDao = new SyncResFileDao { id = NasEnv.DEF_DIR_ID };
+            SyncResFileDao parentDao = new SyncResFileDao { id = NasEnv.DEF_SERVER_DIR_ID };
 
             var tmp = "";
             path = path.Trim(NasEnv.WebSeparator);

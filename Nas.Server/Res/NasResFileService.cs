@@ -70,7 +70,7 @@ namespace Com.Scm.Nas.Res
 
         protected virtual long GetRootDirId()
         {
-            return NasEnv.DEF_DIR_ID;
+            return NasEnv.DEF_SERVER_DIR_ID;
         }
 
         /// <summary>

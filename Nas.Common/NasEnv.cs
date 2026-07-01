@@ -33,9 +33,13 @@
         public const string TempFileExt = ".nas";
 
         /// <summary>
-        /// 默认目录ID
+        /// 默认目录ID(服务端)
         /// </summary>
-        public const long DEF_DIR_ID = 1000000000000000001L;
+        public const long DEF_SERVER_DIR_ID = 1000000000000000001L;
+        /// <summary>
+        /// 默认目录ID(客户端)
+        /// </summary>
+        public const long DEF_CLIENT_DIR_ID = 1L;
 
         /// <summary>
         /// Nas数据目录

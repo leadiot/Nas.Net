@@ -5,30 +5,34 @@
     /// </summary>
     public enum NasScanEnum
     {
-        None = 0,
+        None,
         /// <summary>
         /// 等处理
         /// </summary>
-        Todo = 1,
-        /// <summary>
-        /// 新增
-        /// </summary>
-        Create = 2,
-        /// <summary>
-        /// 更新
-        /// </summary>
-        Change = 3,
+        Todo,
         /// <summary>
         /// 删除
         /// </summary>
-        Delete = 4,
+        Delete,
+        /// <summary>
+        /// 正常
+        /// </summary>
+        Normal,
+        /// <summary>
+        /// 新增
+        /// </summary>
+        Create,
+        /// <summary>
+        /// 更新
+        /// </summary>
+        Change,
         /// <summary>
         /// 上传 
         /// </summary>
-        Upload = 5,
+        Upload,
         /// <summary>
         /// 下载
         /// </summary>
-        Download = 6,
+        Download,
     }
 }

@@ -98,7 +98,12 @@ namespace Com.Scm.Nas.Sync
         public string src { get; set; }
 
         /// <summary>
-        /// 文件修改时间
+        /// 访问时间
+        /// </summary>
+        public long access_time { get; set; }
+
+        /// <summary>
+        /// 修改时间
         /// </summary>
         public long modify_time { get; set; }
 

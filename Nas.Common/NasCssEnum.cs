@@ -9,15 +9,27 @@ namespace Com.Scm.Nas
     {
         None = 0,
 
-        [Description("跳过")]
-        Skip = 1,
+        /// <summary>
+        /// 以最后更新为准
+        /// </summary>
+        [Description("时间优先")]
+        ChangeFirst = 1,
 
+        /// <summary>
+        /// 以本地文件为准
+        /// </summary>
         [Description("保留本地")]
-        KeepNative = 2,
+        NativeFirst = 2,
 
+        /// <summary>
+        /// 以远端文件为准
+        /// </summary>
         [Description("保留远端")]
-        KeepRemote = 3,
+        RemoteFirst = 3,
 
+        /// <summary>
+        /// 保留所有，重命名旧文件为冲突文件
+        /// </summary>
         [Description("保留所有")]
         KeepBoth = 4
     }

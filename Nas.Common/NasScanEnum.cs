@@ -11,13 +11,13 @@
         /// </summary>
         Todo,
         /// <summary>
-        /// 删除
-        /// </summary>
-        Delete,
-        /// <summary>
         /// 正常
         /// </summary>
         Normal,
+        /// <summary>
+        /// 删除
+        /// </summary>
+        Delete,
         /// <summary>
         /// 新增
         /// </summary>

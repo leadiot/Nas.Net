@@ -1632,12 +1632,10 @@ namespace Com.Scm.Nas.Sync
         private string GetTrashPath(ScmUrTerminalDao token, SyncResFileDao dao)
         {
             var userDao = _ResHolder.GetRes<UserDao>(token.user_id);
-            if (userDao == null)
-            {
-                return GetNasPath($"/Trash/{dao.id}" + FileUtils.GetExtension(dao.name));
-            }
+            var trash = userDao != null ? GetNasPath("/" + userDao.codes + NasEnv.PathTrash) : GetNasPath(NasEnv.PathTrash);
+            FileUtils.CreateDir(trash);
 
-            return GetNasPath($"/Trash/{userDao.codes}/{dao.id}" + FileUtils.GetExtension(dao.name));
+            return FileUtils.Combine(trash, dao.id + FileUtils.GetExtension(dao.name));
         }
 
         private string GetNasPath(string path)

@@ -197,6 +197,22 @@ namespace Com.Scm.Nas.Sync
         }
 
         /// <summary>
+        /// 获取指定目录的最大日志ID
+        /// </summary>
+        /// <param name="folderId"></param>
+        /// <returns></returns>
+        [HttpGet("{folderId}")]
+        public async Task<long> GetMaxLogIdAsync(long folderId)
+        {
+            var dao = await _SqlClient.Queryable<SyncLogFolderDao>()
+                .Where(a => a.folder_id == folderId && a.row_status == Enums.ScmRowStatusEnum.Enabled)
+                .OrderBy(a => a.id, OrderByType.Desc)
+                .FirstAsync();
+
+            return dao != null ? dao.id : 0;
+        }
+
+        /// <summary>
         /// 获取同步日志（按时间升序排列）
         /// </summary>
         /// <param name="request"></param>

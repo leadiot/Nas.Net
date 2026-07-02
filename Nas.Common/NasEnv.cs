@@ -112,6 +112,10 @@
         /// 获取日志路径
         /// </summary>
         public const string LogUrl = "/NasSync/Log";
+        /// <summary>
+        /// 获取最大日志ID
+        /// </summary>
+        public const string MaxLogIdUrl = "/NasSync/MaxLogId/";
 
         /// <summary>
         /// 获取文件列表

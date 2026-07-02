@@ -22,7 +22,7 @@ namespace Com.Scm.Nas.Sync
     /// 终端文件同步服务
     /// </summary>
     [NoAuditLog]
-    [ApiExplorerSettings(GroupName = "Scm")]
+    [ApiExplorerSettings(GroupName = "v1")]
     public class NasSyncService : AppService
     {
         private IJwtTokenHolder _JwtHolder;

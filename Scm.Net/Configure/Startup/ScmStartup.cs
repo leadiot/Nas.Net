@@ -64,11 +64,6 @@ namespace Com.Scm.Configure.Startup
             sqlConfig.Prepare(envConfig);
             SqlSetup(services, envConfig, sqlConfig);
 
-            // Swagger配置
-            LogUtils.Info("正在进行Swagger配置...");
-            var swaggerConfig = AppUtils.GetConfig<SwaggerConfig>(SwaggerConfig.NAME);
-            services.SwaggerSetup(swaggerConfig);
-
             // 字体配置
             LogUtils.Info("正在进行字体配置...");
             FontSetup(services, envConfig);
@@ -153,6 +148,8 @@ namespace Com.Scm.Configure.Startup
             mqttClientConfig.Prepare(envConfig);
             services.SetupMqtt(mqttBrokerConfig, mqttClientConfig);
 
+            // 自定义服务
+
             //// NAS 消息服务
             //services.AddNasMessageService();
 
@@ -188,6 +185,16 @@ namespace Com.Scm.Configure.Startup
                 options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
             }).NewtonJsonSetup();
 
+            // Swagger配置
+            //LogUtils.Info("正在进行Swagger配置...");
+            //var swaggerConfig = AppUtils.GetConfig<SwaggerConfig>(SwaggerConfig.NAME);
+            //services.SwaggerSetup(swaggerConfig);
+
+            // Scalar配置
+            LogUtils.Info("正在进行Scalar配置...");
+            var scalarConfig = AppUtils.GetConfig<ScalarConfig>(ScalarConfig.NAME) ?? new ScalarConfig();
+            services.ScalarSetup(scalarConfig);
+
             // 统一响应和异常处理
             //services.AddUnifiedResponse();
             //services.AddApiBehavior();
@@ -204,15 +211,11 @@ namespace Com.Scm.Configure.Startup
         public static WebApplication ConfigureMiddleware(this WebApplication app)
         {
             var envConfig = app.Services.GetRequiredService<EnvConfig>();
-            var swaggerConfig = AppUtils.GetConfig<SwaggerConfig>(SwaggerConfig.NAME);
             var corsConfig = AppUtils.GetConfig<CorsConfig>(CorsConfig.NAME);
+            //var swaggerConfig = AppUtils.GetConfig<SwaggerConfig>(SwaggerConfig.NAME);
+            var scalarConfig = AppUtils.GetConfig<ScalarConfig>(ScalarConfig.NAME);
 
             AppUtils.ServiceProvider = app.Services;
-
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwaggerSetup(swaggerConfig);
-            }
 
             LogUtils.Info("正在进行静态文件设置...");
             app.UseHttpsRedirection();
@@ -258,10 +261,17 @@ namespace Com.Scm.Configure.Startup
 
             // 认证：验证 Authorization 头的令牌（Bearer / Api / App 三种方案）
             app.UseAuthentication();
-            // Jwt 中间件：解析 Claims 注入 ScmContextHolder，必须在 UseAuthentication 之后
-            app.UseMiddleware<JwtMiddleware>();
             // 授权：基于已认证用户检查权限策略
             app.UseAuthorization();
+
+            if (app.Environment.IsDevelopment())
+            {
+                //app.UseSwaggerSetup(swaggerConfig);
+                app.UseScalarSetup(scalarConfig);
+            }
+
+            // Jwt 中间件：解析 Claims 注入 ScmContextHolder，必须在 UseAuthentication 之后
+            app.UseMiddleware<JwtMiddleware>();
 
             // 统一响应中间件（包装所有 API 响应）
             //app.UseUnifiedResponse();

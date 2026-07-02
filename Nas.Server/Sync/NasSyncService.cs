@@ -202,7 +202,7 @@ namespace Com.Scm.Nas.Sync
         /// <param name="folderId"></param>
         /// <returns></returns>
         [HttpGet("{folderId}")]
-        public async Task<long> GetMaxLogIdAsync(long folderId)
+        public async Task<long> GetLatestLogIdAsync(long folderId)
         {
             var dao = await _SqlClient.Queryable<SyncLogFolderDao>()
                 .Where(a => a.folder_id == folderId && a.row_status == Enums.ScmRowStatusEnum.Enabled)

@@ -803,6 +803,13 @@ namespace Com.Scm.Nas.Sync
 
                 _SqlClient.Insertable(resDao).ExecuteCommand();
             }
+            else
+            {
+                resDao.size = logDto.size;
+                resDao.modify_time = logDto.modify_time;
+                resDao.PrepareUpdate(token.user_id);
+                _SqlClient.Updateable(resDao).ExecuteCommand();
+            }
             return resDao;
         }
         #endregion

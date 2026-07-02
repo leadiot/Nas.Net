@@ -189,7 +189,7 @@ namespace Com.Scm.Nas.Res
 
             dao = model.Adapt<NasResFileDao>();
             dao.type = ScmFileTypeEnum.Dir;
-            dao.modify_time = TimeUtils.GetUnixTime(true);
+            dao.modify_time = TimeUtils.GetUnixTime();
             dao.path = NasUtils.CombinePath(parentPath, model.name);
 
             var result = await _thisRepository.InsertAsync(dao);
@@ -227,7 +227,7 @@ namespace Com.Scm.Nas.Res
             var src = dao.path;
             var parentPath = NasUtils.GetParentPath(src);
             dao = model.Adapt(dao);
-            dao.modify_time = TimeUtils.GetUnixTime(true);
+            dao.modify_time = TimeUtils.GetUnixTime();
             dao.path = NasUtils.CombinePath(parentPath, model.name);
             var result = await _thisRepository.UpdateAsync(dao);
 

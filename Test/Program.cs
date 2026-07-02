@@ -13,7 +13,7 @@ internal class Program
         var userId = 1000000000000001030;
         var accessToken = "";
 
-        var time = TimeUtils.GetUnixTime(true);
+        var time = TimeUtils.GetUnixTime();
         var data = terminalId + ":" + userId + ":" + time;
 
         var key = data + ":" + accessToken;
